@@ -17,14 +17,14 @@ of this research and development project.
 ### Protocol "BPro"
 #### Overall
 BPro protocol has several differences from standard BLE-Mesh network protocol:
-*. It uses only one BLE module to communicate.
-*. It is slower than standard protocol.
-*. It can handle more devices than standard protocol.  
+* It uses only one BLE module to communicate.
+* It is slower than standard protocol.
+* It can handle more devices than standard protocol.  
 
 These characteristics of the BLE-Mesh network are archived by next architectural differences:
-*. BPro protocol uses each device as BLE-server and BLE-client to IO data.
-*. BPro protocol uses special identification algorithm based on unique service UUID.
-*. Because of asynchronous nature and strict UUID based identification it can handle huge number of devices (theoretically 16^8 devices).
+* BPro protocol uses each device as BLE-server and BLE-client to IO data.
+* BPro protocol uses special identification algorithm based on unique service UUID.
+* Because of asynchronous nature and strict UUID based identification it can handle huge number of devices (theoretically 16^8 devices).
 
 #### Identification
 The identification number of the device is stored in the service UUID of each module. 
