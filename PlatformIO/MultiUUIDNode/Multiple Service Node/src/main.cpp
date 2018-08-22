@@ -153,7 +153,6 @@ void server(){
   Serial.println("Advertize started");
   delay(serverTime);
   pAdvertising->stop();
-  pService->stop();
 }
 
 //Define priority
