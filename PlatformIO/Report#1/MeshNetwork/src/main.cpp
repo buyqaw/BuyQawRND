@@ -27,8 +27,8 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 std::string rxValueP = "";
 std::string rxValueD = "";
-int scanTime = 1;
-int serverTime = 50000;
+int scanTime = 10;
+int serverTime = 20000;
 
 // Characteristics of WiFi
 const char* ssid = "CleverestTech";
@@ -176,6 +176,7 @@ void define_priority(){
     // int RSSIL = d.getRSSI(); // Get it's signal level [no need now, but for future]
     if(d.haveName()){ // If device has name
       if(d.getName() == "Node" and d.haveServiceUUID()){ // If device has our name and UUID
+        Serial.println("Here is our device");
         std::string Parentraw = d.getServiceUUID().toString(); // Define it's UUID
 
         char UI[3]; UI[2] = '\0';
@@ -188,9 +189,13 @@ void define_priority(){
         Buffer = UI[0];
         // Define value of UUID priority
         int Buf = (uint16_t)Buffer;
+        Serial.print("Buf is: ");
+        Serial.println(Buf);
         // If priority is higher than local maxima than new parent is defined
         if(Buf>parent_max){
           parent_max = Buf;
+          Serial.print("Parentmax is: ");
+          Serial.println(parent_max);
           for(int m = 0; m<3; m++){
             parent[m] = UI[m];
           }
@@ -199,12 +204,14 @@ void define_priority(){
     }
   }
   if(parent_max>0){
+    Serial.print("Parent UUID is: ");
     int maxi_neighbour = 0;
     if(parent[0] == 'A'){
       SERVICE_UUID[0] = '9';
     }
     else{
       SERVICE_UUID[0] = char(int(parent[0])-1);
+      Serial.println(char(int(parent[0])-1));
     }
     // For loop to define same priority nodes
     for (int i = 0; i < count; i++)
@@ -321,6 +328,11 @@ void setup() {
   dRxCharacteristic->setCallbacks(new MyCallbacksD());
 
   pService->start();
+  pAdvertising = pServer->getAdvertising();
+  pAdvertising->start();
+  Serial.println("Advertize started");
+  delay(50000);
+  pAdvertising->stop();
   // Start the service
   Serial.println("Server setted");
 

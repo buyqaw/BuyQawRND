@@ -1,0 +1,73 @@
+Processing esp32dev (platform: espressif32; board: esp32dev; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+PLATFORM: Espressif 32 > Espressif ESP32 Dev Module
+SYSTEM: ESP32 240MHz 320KB RAM (4MB Flash)
+DEBUG: CURRENT(minimodule) EXTERNAL(minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny
+-h, olimex-jtag-tiny)
+
+Library Dependency Finder -> http://bit.ly/configure-pio-ldf
+LDF MODES: FINDER(chain) COMPATIBILITY(soft)
+Collected 25 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- <Wire> 1.0
+|-- <ESP8266_SSD1306> 4.0.0
+|   |-- <Wire> 1.0
+|-- <WiFi> 1.0
+|-- <HTTPClient> 1.1
+|   |-- <WiFi> 1.0
+|   |-- <WiFiClientSecure> 1.0
+|   |   |-- <WiFi> 1.0
+|-- <ESP32 BLE Arduino> 0.4.16
+Compiling .pioenvs/esp32dev/src/main.cpp.o
+src/main.cpp:16:20: warning: 'pServerAddress' defined but not used [-Wunused-variable]
+static BLEAddress *pServerAddress;
+^
+src/main.cpp:17:33: warning: 'pRemoteCharacteristic' defined but not used [-Wunused-variable]
+static BLERemoteCharacteristic* pRemoteCharacteristic;
+^
+Linking .pioenvs/esp32dev/firmware.elf
+Retrieving maximum program size .pioenvs/esp32dev/firmware.elf
+Building .pioenvs/esp32dev/firmware.bin
+Checking size .pioenvs/esp32dev/firmware.elf
+Memory Usage -> http://bit.ly/pio-memory-usage
+DATA:    [==        ]  18.0% (used 59088 bytes from 327680 bytes)
+PROGRAM: [====      ]  36.5% (used 1146797 bytes from 3145728 bytes)
+Configuring upload protocol...
+AVAILABLE: esptool, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-
+tiny
+CURRENT: upload_protocol = esptool
+Looking for upload port...
+
+Use manually specified: /dev/tty.SLAB_USBtoUART
+Uploading .pioenvs/esp32dev/firmware.bin
+Serial port /dev/tty.SLAB_USBtoUART
+Connecting........_
+Chip is ESP32D0WDQ6 (revision 1)
+Features: WiFi, BT, Dual Core
+MAC: 30:ae:a4:43:03:08
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 921600
+Changed.
+Configuring flash size...
+Auto-detected Flash size: 4MB
+Compressed 15088 bytes to 9755...
+Wrote 15088 bytes (9755 compressed) at 0x00001000 in 0.1 seconds (effective 887.4 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 105...
+Wrote 3072 bytes (105 compressed) at 0x00008000 in 0.0 seconds (effective 946.7 kbit/s)...
+Hash of data verified.
+Compressed 8192 bytes to 47...
+Wrote 8192 bytes (47 compressed) at 0x0000e000 in 0.0 seconds (effective 2616.9 kbit/s)...
+Hash of data verified.
+Compressed 1146944 bytes to 639002...
+Wrote 1146944 bytes (639002 compressed) at 0x00010000 in 11.1 seconds (effective 829.6 kbit/s)...
+Hash of data verified.
+
+
+Leaving...
+Hard resetting via RTS pin...
+========================= [SUCCESS] Took 98.59 seconds =========================
