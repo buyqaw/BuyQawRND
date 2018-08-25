@@ -257,13 +257,13 @@ void define_priority(){
       }
   }
   if(parent_max>0){
-    if(parent[0] == 'A'){
+    if(parent[0] == 'a'){
       SERVICE_UUID[0] = '9';
     }
     else{
       SERVICE_UUID[0] = char(int(parent[0])-1);
     }
-    if(char(SERVICE_UUID[0]) == 'F'){
+    if(char(SERVICE_UUID[0]) == 'f'){
         isParent = true;
     }
     // For loop to define same priority nodes
@@ -283,7 +283,7 @@ void define_priority(){
                   if(maxi_neighbour < int(char(Parentraw[1]))){
                     maxi_neighbour = int(char(Parentraw[1]));
                     if(maxi_neighbour == 57){
-                      SERVICE_UUID[1] = 'A';
+                      SERVICE_UUID[1] = 'a';
                     }
                     else{
                       SERVICE_UUID[1] = char(int(maxi_neighbour + 1));
@@ -392,6 +392,7 @@ void setup(){
   Serial.println("Advertize started");
 
   // Wait 5 minutes
+  // TODO: do not forget to change delay
   delay(3);
 
   // Stop server
