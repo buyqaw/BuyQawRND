@@ -38,12 +38,13 @@ int serverTime = 20000; // Server uptime in milliseconds
 
 // Variables of mesh network
 int maxi_neighbour = 0;
-int isParent = 0;
+bool isParent = false;
 
-// Characteristics of WiFi
+// Characteristics of WiFi and HTTP server
 const char* ssid = "CleverestTech";
 String ssidS = "CleverestTech"; // Please, dublicate it
 const char* password =  "Robotics1sTheBest";
+char* IP = "http://192.168.1.109/";
 
 // Changing device statuses if anybody connect/disconnect
 class MyServerCallbacks: public BLEServerCallbacks {
@@ -84,6 +85,42 @@ class MyCallbacksD: public BLECharacteristicCallbacks {
       }
     }
 };
+
+// Function to take data from HTTP server
+void TakeFromInternet(){
+  delay(4000);   //Delay needed before calling the WiFi.begin
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) { //Check for the connection
+    delay(1000);
+    Serial.println("Connecting to WiFi..");
+  }
+  Serial.println("Connected to the WiFi network");
+
+  if(WiFi.status()== WL_CONNECTED){   //Check WiFi connection status
+   HTTPClient http;
+   http.begin(IP);  //Specify destination for HTTP request
+   http.addHeader("Content-Type", "text/plain"); //Specify content-type header
+   String rxValueDraw;
+   for(int i; i < rxValueD.length(); i++){
+     rxValueDraw[i] = rxValueD[i];
+   }
+   int httpResponseCode = http.POST(rxValueDraw);   //Send the actual POST request
+   if(httpResponseCode>0){
+    String rxValuePraw = http.getString();  //Get the response to the request
+    for(int i; i < rxValuePraw.length(); i++){
+      rxValueP[i] = rxValuePraw[i];
+    }
+    Serial.println(httpResponseCode);   //Print return code
+   }else{
+    Serial.print("Error on sending POST: ");
+    Serial.println(httpResponseCode);
+   }
+   http.end();  //Free resources
+ }else{
+    Serial.println("Error in WiFi connection");
+ }
+ WiFi.disconnect();
+}
 
 // Function to write to parent
 void Write2ServerP(std::string adress, std::string serviceUUID){
@@ -180,8 +217,7 @@ void define_priority(){
   BLEScanResults foundDevices = pBLEScan->start(scanTime); // List of devices
   int count = foundDevices.getCount(); // Define number of found devices
   // Define local variable for UUID of parent node
-  char parent[3];
-  parent[2] = '\0';
+  std::string parent;
   // Define local variable to priority of parent node
   int parent_max = 0;
   // For loop to define highest priority node
@@ -203,15 +239,9 @@ void define_priority(){
             char(d.getServiceUUID().toString()[11]) == char('c')){
               Serial.println("Here is our device");
               std::string Parentraw = d.getServiceUUID().toString(); // Define it's UUID
-
-              char UI[3]; UI[2] = '\0';
-              // Transform std::string to char
-              for(int i = 0; i<3; i++){
-                UI[i] = char(Parentraw[i]);
-              }
               // Define buffer to UUID transformation
               char Buffer;
-              Buffer = UI[0];
+              Buffer = Parentraw[0];
               // Define value of UUID priority
               int Buf = int(Buffer);
               Serial.print("Buf is: ");
@@ -221,24 +251,20 @@ void define_priority(){
                 parent_max = Buf;
                 Serial.print("Parentmax is: ");
                 Serial.println(parent_max);
-                for(int m = 0; m<3; m++){
-                  parent[m] = UI[m];
-                }
+                parent = Parentraw;
               }
         }
       }
   }
   if(parent_max>0){
-    Serial.print("Parent UUID is: ");
     if(parent[0] == 'A'){
       SERVICE_UUID[0] = '9';
     }
     else{
       SERVICE_UUID[0] = char(int(parent[0])-1);
-      Serial.println(char(int(parent[0])-1));
     }
     if(char(SERVICE_UUID[0]) == 'F'){
-        isParent = 1;
+        isParent = true;
     }
     // For loop to define same priority nodes
     for (int i = 0; i < count; i++)
@@ -249,34 +275,27 @@ void define_priority(){
           if(char(d.getServiceUUID().toString()[9]) == char('b') and
               char(d.getServiceUUID().toString()[11]) == char('c')){
                 std::string Parentraw = d.getServiceUUID().toString(); // Define it's UUID
-
-                char UI[3]; UI[2] = '\0';
-                // Transform std::string to char
-                for(int i = 0; i<3; i++){
-                  UI[i] = char(Parentraw[i]);
-                }
                 // Define buffer to UUID transformation
                 char Buffer;
-                Buffer = UI[0];
+                Buffer = Parentraw[0];
 
                 if(Buffer == char(SERVICE_UUID[0])){
-                  if(maxi_neighbour < int(char(UI[1]))){
-                    maxi_neighbour = int(char(UI[1]));
+                  if(maxi_neighbour < int(char(Parentraw[1]))){
+                    maxi_neighbour = int(char(Parentraw[1]));
+                    if(maxi_neighbour == 57){
+                      SERVICE_UUID[1] = 'A';
+                    }
+                    else{
+                      SERVICE_UUID[1] = char(int(maxi_neighbour + 1));
+                      Serial.print("Service UUID 1 is: ");
+                      Serial.println(SERVICE_UUID[1]);
+                    }
                   }
                 }
                 // If priority is higher than local maxima than new parent is defined
-
-              }
-
+            }
         }
       }
-    }
-
-    if(maxi_neighbour == 57){
-      SERVICE_UUID[1] = 'A';
-    }
-    else{
-      SERVICE_UUID[1] = char(maxi_neighbour + 1);
     }
   }
 }
@@ -373,7 +392,7 @@ void setup(){
   Serial.println("Advertize started");
 
   // Wait 5 minutes
-  delay(300000);
+  delay(3);
 
   // Stop server
   pAdvertising->stop();
@@ -387,6 +406,11 @@ void loop(){
   Serial.println("I am server now for 20s, waiting for information");
   server();
   delay(1000);
+
+  // If we are Parent node, take data from HTTP server
+  if(isParent){
+    TakeFromInternet();
+  }
 
   // Create client to write data
   Serial.println("I am client now, writing information to servers");
