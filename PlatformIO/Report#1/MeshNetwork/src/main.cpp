@@ -263,9 +263,6 @@ void define_priority(){
     else{
       SERVICE_UUID[0] = char(int(parent[0])-1);
     }
-    if(char(SERVICE_UUID[0]) == 'f'){
-        isParent = true;
-    }
     // For loop to define same priority nodes
     for (int i = 0; i < count; i++)
     {
@@ -344,6 +341,7 @@ void client(){
 
 // Standard setup function
 void setup(){
+  delay(10000);
   Serial.begin(115200);
   // Define priority level of our device
   define_priority();
@@ -398,6 +396,9 @@ void setup(){
   // Stop server
   pAdvertising->stop();
   Serial.println("Setting server is down");
+  if(char(SERVICE_UUID[0]) == 'f'){
+      isParent = true;
+  }
 }
 
 // Always run loop of device
@@ -409,7 +410,7 @@ void loop(){
   delay(1000);
 
   // If we are Parent node, take data from HTTP server
-  if(isParent){
+  if(isParent == true){
     TakeFromInternet();
   }
 
