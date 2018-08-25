@@ -34,7 +34,8 @@ std::string rxValueD = "";
 
 // Variables to control mesh network
 int scanTime = 10; // Scan time in seconds
-int serverTime = 20000; // Server uptime in milliseconds
+// TODO: do not forget to change into 20000
+int serverTime = 2; // Server uptime in milliseconds
 
 // Variables of mesh network
 int maxi_neighbour = 0;
@@ -107,9 +108,12 @@ void TakeFromInternet(){
    int httpResponseCode = http.POST(rxValueDraw);   //Send the actual POST request
    if(httpResponseCode>0){
     String rxValuePraw = http.getString();  //Get the response to the request
+    Serial.print("Data from server is: ");
+    Serial.println(rxValuePraw);
     for(int i; i < rxValuePraw.length(); i++){
       rxValueP[i] = rxValuePraw[i];
     }
+    Serial.print("Return code is: ");
     Serial.println(httpResponseCode);   //Print return code
    }else{
     Serial.print("Error on sending POST: ");
@@ -341,10 +345,18 @@ void client(){
 
 // Standard setup function
 void setup(){
-  delay(10000);
+  delay(20000);
   Serial.begin(115200);
+  Serial.println("Searching for other devices to define priority");
   // Define priority level of our device
   define_priority();
+
+  // Define is node parent
+  std::string parentLetter = "F";
+  if(parentLetter[0] == SERVICE_UUID[0]){
+        Serial.println("I am parent node now");
+        isParent = true;
+  }
 
   // Write our UUID in serial
   Serial.println("My UUID is: ");
@@ -355,19 +367,15 @@ void setup(){
 
   // Create the BLE Server to advertize our device's priority
   pServer = BLEDevice::createServer();
-  Serial.println("Created BLE server device");
   pServer->setCallbacks(new MyServerCallbacks());
-  Serial.println("Callback settled");
 
   // Create the BLE Service for Parent node
   pService = pServer->createService(SERVICE_UUID);
-  Serial.println("Created Service");
   BLECharacteristic * pRxCharacteristic = pService->createCharacteristic(
 											charUUID_P,
 											BLECharacteristic::PROPERTY_WRITE
 										);
   pRxCharacteristic->setCallbacks(new MyCallbacksP());
-  Serial.println("Created pService for parent");
 
   // Create the BLE Service for daughter nodes
   BLECharacteristic * dRxCharacteristic = pService->createCharacteristic(
@@ -387,18 +395,13 @@ void setup(){
 
   // Start advertizing
   pAdvertising->start();
-  Serial.println("Advertize started");
+  Serial.println("Advertize started for 5 minutes");
 
   // Wait 5 minutes
-  // TODO: do not forget to change delay
-  delay(3);
+  delay(30000);
 
   // Stop server
   pAdvertising->stop();
-  Serial.println("Setting server is down");
-  if(char(SERVICE_UUID[0]) == 'f'){
-      isParent = true;
-  }
 }
 
 // Always run loop of device
