@@ -1,0 +1,70 @@
+Project \char`\"{}\+Bayqaw\char`\"{}
+
+Installation ~\newline
+You need to install E\+S\+P32 library from git\+: \href{https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/mac.md}{\tt https\+://github.\+com/espressif/arduino-\/esp32/blob/master/docs/arduino-\/ide/mac.\+md}
+
+Then you need to install usb to U\+A\+RT driver ~\newline
+\href{https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers}{\tt https\+://www.\+silabs.\+com/products/development-\/tools/software/usb-\/to-\/uart-\/bridge-\/vcp-\/drivers}
+
+\subsection*{B\+L\+E-\/\+Mesh network}
+
+B\+L\+E-\/\+Mesh network is the special form of connection type where all elements of the network are nodes of the connection. Normally in the specification of the B\+L\+E-\/\+Mesh network is written that the devices that works in the mesh network have to be dual connection devices. By the other words, they got to have two B\+LE modules. In our case, we need to decrease cost of the project to the global minimum. As a result, we are introducing new protocol called \char`\"{}\+B\+Pro\char`\"{} that was developed to satisfy limitations and purposes of the Technical Task of this research and development project. \subsubsection*{Protocol \char`\"{}\+B\+Pro\char`\"{}}
+
+\paragraph*{Overall}
+
+B\+Pro protocol has several differences from standard B\+L\+E-\/\+Mesh network protocol\+:
+\begin{DoxyItemize}
+\item It uses only one B\+LE module to communicate.
+\item It is slower than standard protocol.
+\item It can handle more devices than standard protocol. ~\newline
+ These characteristics of the B\+L\+E-\/\+Mesh network are archived by next architectural differences\+:
+\item B\+Pro protocol uses each device as B\+L\+E-\/server and B\+L\+E-\/client to IO data.
+\item B\+Pro protocol uses special identification algorithm based on unique service U\+U\+ID.
+\item Because of asynchronous nature and strict U\+U\+ID based identification it can handle huge number of devices (theoretically 16$^\wedge$8 devices).
+\end{DoxyItemize}
+
+\paragraph*{Identification}
+
+The identification number of the device is stored in the service U\+U\+ID of each module. Normally B\+LE device has service U\+U\+ID as next\+: 
+\begin{DoxyCode}
+4fafc201-1fb5-459e-8fcc-c5c9c331914b
+\end{DoxyCode}
+ These groups of bytes are used to encapsulate data as in our case. But we use it to identify priority of the devices.
+\begin{DoxyEnumerate}
+\item Highest priority\+: 1\+X\+X\+X\+X\+X\+XX -\/ Device directly connected to the Wi-\/\+Fi.
+\item Lowest priority\+: X\+X\+X\+X\+X\+X\+X1 -\/ Device connected to the 7th device counting from the device with highest priority.
+\end{DoxyEnumerate}
+
+For example, there is pseudocode of the priority generation\+: 
+\begin{DoxyCode}
+is\_wifi\_connected = try\_to\_connect(ESSID, passwd)
+if is\_wifi\_connected == TRUE:
+  UUID = "1".join(["%s" % randint(0, 9) for num in range(0, 7)])
+else:
+  highes\_priority\_neighbour = scan\_for\_other\_devices(find\_the\_highest\_priority\_of\_neighbours)
+  UUID = create\_UUID\_with\_less\_priority(highes\_priority\_neighbour)
+return UUID
+\end{DoxyCode}
+
+
+By simple words\+:
+\begin{DoxyEnumerate}
+\item If device is connected to Wi-\/\+Fi -\/$>$ it has highes priority
+\item If device is not connected -\/$>$ it searches neighbour with highes priority
+\item Then it creates U\+U\+ID with priority 1 byte less than the priority of the highest priority neighbour
+\item It means that the priority level is the distance of device to the Wi-\/\+Fi hotspot
+\end{DoxyEnumerate}
+
+\paragraph*{Algorithm}
+
+The next list is the steps of the connection protocol of the B\+L\+E-\/\+Mesh network of the \char`\"{}\+Bayqaw\char`\"{} project.
+\begin{DoxyEnumerate}
+\item Device is turned on.
+\item It starts to scan for wi-\/fi -\/$>$ if Wi-\/\+Fi is reachable go to point 5.
+\item It scans neighbours with highes priority.
+\item Device connects to neighbour with highest priority (parent neighbour) and creates new U\+U\+ID.
+\item Device does job (reads sensor values or whatever) and takes information from daughter devices -\/ 2 minutes.
+\item Device turns to client mode and starts to scan parent neighbour.
+\item Device sends all data to parent neighbour, which is in server mode OR to tcp server if there is Wi-\/\+Fi.
+\item Device goes to 5. 
+\end{DoxyEnumerate}

@@ -1,0 +1,27 @@
+Bayqaw - Папка репозитория
+├── PlatformIO - Папка ПО
+│   └── Report#1 - Папка ПО для первого отчета
+│       ├── DistanceAnalyser - Папка ПО анализа уровня сигнала
+│       │   ├── build.log - Лог файл компиляции
+│       │   ├── custompart.csv - Таблица разделов
+│       │   ├── lib - Папка для библиотек
+│       │   ├── platformio.ini - Файл характеристик компиляции для ПО
+│       │   └── src - Папка с исходным кодом
+│       │       └── main.cpp - Исходный код
+│       ├── MeshNetwork - Папка ПО Mesh Network
+│       ├── NakedServer - Папка ПО для пустого сервера (для тестов)
+│       └── NodesCalculation - Папка ПО BNC
+├── Python\ Files - Папка для хранения ПО на Python
+│   └── simple_http_server.py - HTTP сервер на Python для тестов
+├── README.md - Файл описания репозитория
+├── Trash - Мусор ПО для тестов
+├── bayqaw.wiki - Папка вики страницы
+├── Источники - Папка с библиографией
+├── Отчет №1.docx - Отчет №1
+└── Спецификации BLE - Папка со спецификациями BLE
+    ├── Bluetooth\ Mesh\ Overview\ (1).pdf - Спецификация BLE Mesh Network
+    ├── CSS\ v7.pdf - Дополнение к общей спецификации Bluetooth
+    ├── Core\ Specification\ Addendum\ (CSA)\ 6.pdf - Дополнение к общей спецификации Bluetooth
+    ├── Core_v5.0.pdf - Основная спецификация Bluetooth
+    ├── Mesh\ Device\ Properties\ v1.0\ (1).pdf - Спецификация девайсов для BLE Mesh Network
+    └── Mesh_Model_Specification\ v1.0\ (1).pdf - Спецификация моделей BLE Mesh Network

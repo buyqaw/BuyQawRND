@@ -1,0 +1,101 @@
+.TH "md__r_e_a_d_m_e" 3 "Mon Aug 27 2018" "Version 0.0.1" "Bayqaw" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+md__r_e_a_d_m_e \- bayqaw 
+Project 'Bayqaw'
+.PP
+Installation 
+.br
+You need to install ESP32 library from git: https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/mac.md
+.PP
+Then you need to install usb to UART driver 
+.br
+https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers
+.PP
+.SS "BLE-Mesh network"
+.PP
+BLE-Mesh network is the special form of connection type where all elements of the network are nodes of the connection\&. Normally in the specification of the BLE-Mesh network is written that the devices that works in the mesh network have to be dual connection devices\&. By the other words, they got to have two BLE modules\&. In our case, we need to decrease cost of the project to the global minimum\&. As a result, we are introducing new protocol called 'BPro' that was developed to satisfy limitations and purposes of the Technical Task of this research and development project\&. 
+.SS "Protocol 'BPro'"
+.PP
+.SS "Overall"
+.PP
+BPro protocol has several differences from standard BLE-Mesh network protocol:
+.IP "\(bu" 2
+It uses only one BLE module to communicate\&.
+.IP "\(bu" 2
+It is slower than standard protocol\&.
+.IP "\(bu" 2
+It can handle more devices than standard protocol\&. 
+.br
+ These characteristics of the BLE-Mesh network are archived by next architectural differences:
+.IP "\(bu" 2
+BPro protocol uses each device as BLE-server and BLE-client to IO data\&.
+.IP "\(bu" 2
+BPro protocol uses special identification algorithm based on unique service UUID\&.
+.IP "\(bu" 2
+Because of asynchronous nature and strict UUID based identification it can handle huge number of devices (theoretically 16^8 devices)\&.
+.PP
+.PP
+.SS "Identification"
+.PP
+The identification number of the device is stored in the service UUID of each module\&. Normally BLE device has service UUID as next: 
+.PP
+.nf
+4fafc201-1fb5-459e-8fcc-c5c9c331914b
+
+.fi
+.PP
+ These groups of bytes are used to encapsulate data as in our case\&. But we use it to identify priority of the devices\&.
+.IP "1." 4
+Highest priority: 1XXXXXXX - Device directly connected to the Wi-Fi\&.
+.IP "2." 4
+Lowest priority: XXXXXXX1 - Device connected to the 7th device counting from the device with highest priority\&.
+.PP
+.PP
+For example, there is pseudocode of the priority generation: 
+.PP
+.nf
+is_wifi_connected = try_to_connect(ESSID, passwd)
+if is_wifi_connected == TRUE:
+  UUID = "1"\&.join(["%s" % randint(0, 9) for num in range(0, 7)])
+else:
+  highes_priority_neighbour = scan_for_other_devices(find_the_highest_priority_of_neighbours)
+  UUID = create_UUID_with_less_priority(highes_priority_neighbour)
+return UUID
+
+.fi
+.PP
+.PP
+By simple words:
+.IP "1." 4
+If device is connected to Wi-Fi -> it has highes priority
+.IP "2." 4
+If device is not connected -> it searches neighbour with highes priority
+.IP "3." 4
+Then it creates UUID with priority 1 byte less than the priority of the highest priority neighbour
+.IP "4." 4
+It means that the priority level is the distance of device to the Wi-Fi hotspot
+.PP
+.PP
+.SS "Algorithm"
+.PP
+The next list is the steps of the connection protocol of the BLE-Mesh network of the 'Bayqaw' project\&.
+.IP "1." 4
+Device is turned on\&.
+.IP "2." 4
+It starts to scan for wi-fi -> if Wi-Fi is reachable go to point 5\&.
+.IP "3." 4
+It scans neighbours with highes priority\&.
+.IP "4." 4
+Device connects to neighbour with highest priority (parent neighbour) and creates new UUID\&.
+.IP "5." 4
+Device does job (reads sensor values or whatever) and takes information from daughter devices - 2 minutes\&.
+.IP "6." 4
+Device turns to client mode and starts to scan parent neighbour\&.
+.IP "7." 4
+Device sends all data to parent neighbour, which is in server mode OR to tcp server if there is Wi-Fi\&.
+.IP "8." 4
+Device goes to 5\&. 
+.PP
+
