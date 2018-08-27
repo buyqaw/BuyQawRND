@@ -34,8 +34,7 @@ std::string rxValueD = "";
 
 // Variables to control mesh network
 int scanTime = 10; // Scan time in seconds
-// TODO: do not forget to change into 20000
-int serverTime = 2; // Server uptime in milliseconds
+int serverTime = 20000; // Server uptime in milliseconds
 
 // Variables of mesh network
 int maxi_neighbour = 0;
