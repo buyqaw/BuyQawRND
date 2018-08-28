@@ -418,8 +418,6 @@ void loop(){
 
   // Create client to write data
   Serial.println("I am client now, writing information to servers");
-  Serial.println("Sended to parent: Hello, parent!");
-  Serial.println("Sended to daughter: Hello, daughter!");
   client();
   delay(1000);
 
