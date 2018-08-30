@@ -44,7 +44,7 @@ std::string SERVICE_UUID = "F0000000-B5A3-F393-E0A9-E50E24DCCA9E";
 // Function to open door
 void open(){
   digitalWrite(GRN, HIGH);
-  delay(10000);
+  delay(5000);
   digitalWrite(GRN, LOW);
 }
 
@@ -59,7 +59,12 @@ int scan_env(){
     BLEAdvertisedDevice d = foundDevices.getDevice(i); // Define found device
     // int RSSIL = d.getRSSI(); // Get it's signal level [no need now, but for future]
     if(d.haveName()){ // If device has name
-      if(d.getName() == "Node" and int(d.getRSSI()) > (-70)){ // If device has our name and UUID
+      Serial.println(int(d.getRSSI()));
+      if(d.getName() == "NodeL" and int(d.getRSSI()) > (-80)){ // If device has our name and UUID
+        Serial.println(int(d.getRSSI()));
+        return 1;
+      }
+      if(d.getName() == "Node" and int(d.getRSSI()) > (-50)){ // If device has our name and UUID
         Serial.println(int(d.getRSSI()));
         return 1;
       }
