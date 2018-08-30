@@ -50,9 +50,10 @@ void define_priority(){
   {
     BLEAdvertisedDevice d = foundDevices.getDevice(i); // Define found device
     // int RSSIL = d.getRSSI(); // Get it's signal level [no need now, but for future]
-    if(d.haveName()){ // If device has name
-      if(d.getName() == "Node"){ // If device has our name and UUID
-        nodes = nodes + 1;
+    if(d.haveServiceUUID()){ // If device has our UUID
+      if(char(d.getServiceUUID().toString()[9]) == char('b') and
+          char(d.getServiceUUID().toString()[11]) == char('c')){ // If device has our name and UUID
+            nodes = nodes + 1;
       }
     }
   }
@@ -67,15 +68,18 @@ void setup() {
   pBLEScan = BLEDevice::getScan(); //create new scan
   pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
   display.init();
-}
-
-void loop() {
-  define_priority();
-  Serial.println(nodes);
-  Serial.println("String:");
-  Serial.println(String(nodes));
-  Serial.println("=================================");
   display.flipScreenVertically();
+  display.clear();
+  display.setFont(ArialMT_Plain_10);
+    // clear the display
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(0, 0, "BeInTech");
+  display.drawString(0, 10, "Cleverest Technologies");
+  display.drawString(0, 20, "Bayqaw project");
+  display.drawString(0, 30, "Calculating");
+  display.display();
+  define_priority();
   display.clear();
   display.setFont(ArialMT_Plain_10);
     // clear the display
@@ -89,5 +93,8 @@ void loop() {
   display.drawStringMaxWidth(0, 40, 128, Level);
   display.display();
   nodes = 0;
+}
+
+void loop() {
   delay(1000);
 }
