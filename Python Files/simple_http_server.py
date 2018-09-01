@@ -7,7 +7,12 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 def foo():
     print(request.get_data())
-    return "Hello, ESP!"
+    if(request.get_data() == b''):
+        requests = ['AAS54']
+    else:
+        requests = ['None']
+    print("Our answer is: " + requests[0])
+    return requests[0]
 
 
 if __name__ == '__main__':

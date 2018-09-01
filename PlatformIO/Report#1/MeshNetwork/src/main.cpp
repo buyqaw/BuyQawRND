@@ -29,12 +29,13 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
 // String for data from/to Parent and Daughters
-std::string rxValueP = "";
-std::string rxValueD = "";
+std::string rxValueP = "     ";
+std::string rxValueD = "     ";
 
 // Variables to control mesh network
-int scanTime = 10; // Scan time in seconds
-int serverTime = 20000; // Server uptime in milliseconds
+//TODO: change it
+int scanTime = 5; // Scan time in seconds
+int serverTime = 10000; // Server uptime in milliseconds
 
 // Variables of mesh network
 int maxi_neighbour = 0;
@@ -61,7 +62,7 @@ class MyCallbacksP: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
       std::string rxValuePraw = pCharacteristic->getValue();
       if (rxValuePraw.length() > 0) {
-        rxValueP = rxValueP + rxValuePraw;
+        rxValueP = rxValuePraw;
         Serial.println("New value from parent is: ");
         for(int i = 0; i<rxValueP.length(); i++){
           Serial.print(char(rxValueP[i]));
@@ -100,18 +101,32 @@ void TakeFromInternet(){
    HTTPClient http;
    http.begin(IP);  //Specify destination for HTTP request
    http.addHeader("Content-Type", "text/plain"); //Specify content-type header
-   String rxValueDraw;
-   for(int i; i < rxValueD.length(); i++){
-     rxValueDraw[i] = rxValueD[i];
+   String rxValuePraw;
+   for(int v = 0; v < rxValueP.length(); v++){
+     rxValuePraw[v] = char(rxValueP[v]);
    }
-   int httpResponseCode = http.POST(rxValueDraw);   //Send the actual POST request
+   Serial.print("Responce in memory is: ");
+   for(int v = 0; v < rxValueP.length(); v++){
+     Serial.print(char(rxValueP[v]));
+   }
+   Serial.println(" ");
+   Serial.print("Our responce is: ");
+   Serial.println(rxValuePraw);
+   int httpResponseCode = http.POST(rxValuePraw);   //Send the actual POST request
    if(httpResponseCode>0){
-    String rxValuePraw = http.getString();  //Get the response to the request
+    String rxValueDraw = http.getString();  //Get the response to the request
     Serial.print("Data from server is: ");
-    Serial.println(rxValuePraw);
-    for(int i; i < rxValuePraw.length(); i++){
-      rxValueP[i] = rxValuePraw[i];
+    Serial.println(rxValueDraw);
+    for(int i = 0; i < rxValueDraw.length(); i++){
+      rxValueD[i] = rxValueDraw[i];
     }
+    Serial.print("Server info is: ");
+    Serial.print(char(rxValueD[0]));
+    Serial.print(char(rxValueD[1]));
+    Serial.print(char(rxValueD[2]));
+    Serial.print(char(rxValueD[3]));
+    Serial.println(char(rxValueD[4]));
+
     Serial.print("Return code is: ");
     Serial.println(httpResponseCode);   //Print return code
    }else{
@@ -191,13 +206,51 @@ void Write2ServerD(std::string adress, std::string serviceUUID){
 }
 
 // Change data from Daughter
-void DoSmtWithDataFromD(){
-  rxValueD = "I am: " + SERVICE_UUID + "; Data from daughter is: " + rxValueD;
-}
-
-// Change data from parent
-void DoSmtWithDataFromP(){
-  rxValueP = "I am: " + SERVICE_UUID + "; Data from daughter is: " + rxValueP;
+void DoSmtWithData(){
+  String rxValuePraw;
+  //rxValueP -> comes from parent goes to daughter
+  //rxValueD -> comes from daughter goes to parent
+  if(rxValueD[0] == SERVICE_UUID[0] and rxValueD[1] == SERVICE_UUID[1]){
+    Serial.println("We have command from HTTP server");
+    if(rxValueD[2] == 'S'){
+      Serial.println("Command is sumation");
+      int first = int(char(rxValueD[3])) - 48;
+      int second = int(char(rxValueD[4])) - 48;
+      int ans = first + second;
+      Serial.print("Answer is: ");
+      Serial.println(ans);
+      rxValuePraw = String(SERVICE_UUID[0]) + String(SERVICE_UUID[1]) + String(ans);
+      Serial.println(rxValuePraw);
+    }
+  }
+  if(rxValueD[0] == 'A' and rxValueD[1] == 'A'){
+    Serial.println("We have command from HTTP server for all");
+    if(rxValueD[2] == 'S'){
+      Serial.println("Command is sumation");
+      int first = int(char(rxValueD[3])) - 48;
+      int second = int(char(rxValueD[4])) - 48;
+      int ans = first + second;
+      Serial.print("Answer is: ");
+      Serial.println(ans);
+      rxValuePraw = String(SERVICE_UUID[0]) + String(SERVICE_UUID[1]) + String(ans);
+      Serial.println(rxValuePraw);
+    }
+  }
+  std::string ans = "     ";
+  for(int k = 0; k < rxValuePraw.length(); k++){
+    ans[k] = char(rxValuePraw[k]);
+  }
+  Serial.print("Value in function: ");
+  for(int v = 0; v < rxValueP.length(); v++){
+    Serial.print(char(ans[v]));
+  }
+  Serial.println(" ");
+  rxValueP = ans + rxValueP;
+  Serial.print("Wrote to memory: ");
+  for(int v = 0; v < rxValueP.length(); v++){
+    Serial.print(char(rxValueP[v]));
+  }
+  Serial.println(" ");
 }
 
 // BLE server (take data from daughter and parent)
@@ -322,11 +375,6 @@ void client(){
       if(char(d.getServiceUUID().toString()[9]) == char('b') and
           char(d.getServiceUUID().toString()[11]) == char('c')){ // If device has our UUID
         std::string UUIDraw = d.getServiceUUID().toString(); // Define it's UUID
-
-        // Do smt with data
-        DoSmtWithDataFromD();
-        DoSmtWithDataFromP();
-
           // If device is our parent - send data
           if(int(char(UUIDraw[0]))>int(char(SERVICE_UUID[0]))){
             std::string adress = d.getAddress().toString();
@@ -397,6 +445,7 @@ void setup(){
   Serial.println("Advertize started for 5 minutes");
 
   // Wait 5 minutes
+  // TODO: change it
   delay(30000);
 
   // Stop server
@@ -414,14 +463,14 @@ void loop(){
   // If we are Parent node, take data from HTTP server
   if(isParent == true){
     TakeFromInternet();
+    delay(1000);
   }
+
+  // Do smt with data
+  DoSmtWithData();
 
   // Create client to write data
   Serial.println("I am client now, writing information to servers");
   client();
   delay(1000);
-
-  // Zero data
-  rxValueP = "";
-  rxValueD = "";
 }
