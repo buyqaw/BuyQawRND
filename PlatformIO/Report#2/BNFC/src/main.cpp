@@ -53,11 +53,13 @@ int scan_env(){
   {
     BLEAdvertisedDevice d = foundDevices.getDevice(i); // Define found device
     // int RSSIL = d.getRSSI(); // Get it's signal level [no need now, but for future]
+    String mac = "24:0a:64:43:77:df";
+                for (int b = 0; b < 17; b++){
+                  mac[b] = d.getAddress().toString()[b];
+                }
+    Serial.println();
     if(d.haveName()){ // If device has name
-      String mac = "24:0a:64:43:77:df";
-                  for (int b = 0; b < 17; b++){
-                    mac[b] = d.getAddress().toString()[b];
-                  }
+
       Serial.println(int(d.getRSSI()));
       if(d.getName() == "NodeL" and int(d.getRSSI()) > (-80)){ // If device has our name and UUID
         Serial.println(int(d.getRSSI()));
@@ -67,6 +69,8 @@ int scan_env(){
         Serial.println(int(d.getRSSI()));
         return 1;
       }
+
+      }
       if(mac == "a4:c1:7a:57:1c:c1" and int(d.getRSSI()) > (-50)){ // If device has our name and UUID
         Serial.println(int(d.getRSSI()));
         return 1;
@@ -74,7 +78,6 @@ int scan_env(){
       if(mac == "12:3b:6a:1b:56:77" and int(d.getRSSI()) > (-50)){ // If device has our name and UUID
         Serial.println(int(d.getRSSI()));
         return 1;
-      }
     }
   }
   return 0;
