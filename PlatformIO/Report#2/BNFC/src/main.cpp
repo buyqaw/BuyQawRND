@@ -31,9 +31,6 @@ std::string rxValueP = "";
 std::string rxValueD = "";
 int scanTime = 1;
 
-int RED = 13;
-int GRN = 12;
-
 // Characteristics of WiFi
 const char* ssid = "CleverestTech";
 String ssidS = "CleverestTech"; // Please, dublicate it
@@ -43,9 +40,7 @@ std::string SERVICE_UUID = "F0000000-B5A3-F393-E0A9-E50E24DCCA9E";
 
 // Function to open door
 void open(){
-  digitalWrite(GRN, HIGH);
   delay(5000);
-  digitalWrite(GRN, LOW);
 }
 
 // Search our devices
@@ -59,12 +54,24 @@ int scan_env(){
     BLEAdvertisedDevice d = foundDevices.getDevice(i); // Define found device
     // int RSSIL = d.getRSSI(); // Get it's signal level [no need now, but for future]
     if(d.haveName()){ // If device has name
+      String mac = "24:0a:64:43:77:df";
+                  for (int b = 0; b < 17; b++){
+                    mac[b] = d.getAddress().toString()[b];
+                  }
       Serial.println(int(d.getRSSI()));
       if(d.getName() == "NodeL" and int(d.getRSSI()) > (-80)){ // If device has our name and UUID
         Serial.println(int(d.getRSSI()));
         return 1;
       }
       if(d.getName() == "Node" and int(d.getRSSI()) > (-50)){ // If device has our name and UUID
+        Serial.println(int(d.getRSSI()));
+        return 1;
+      }
+      if(mac == "a4:c1:7a:57:1c:c1" and int(d.getRSSI()) > (-50)){ // If device has our name and UUID
+        Serial.println(int(d.getRSSI()));
+        return 1;
+      }
+      if(mac == "12:3b:6a:1b:56:77" and int(d.getRSSI()) > (-50)){ // If device has our name and UUID
         Serial.println(int(d.getRSSI()));
         return 1;
       }
@@ -76,8 +83,6 @@ int scan_env(){
 void setup() {
   Serial.begin(115200);
   Serial.println("Scanning...");
-  pinMode(RED, OUTPUT);
-  pinMode(GRN, OUTPUT);
   BLEDevice::init("Node"); // Initialize BLE device
   BLEDevice::setPower(ESP_PWR_LVL_P7);
   pBLEScan = BLEDevice::getScan(); //create new scan
