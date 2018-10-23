@@ -9,13 +9,15 @@
 #include <BLEAdvertisedDevice.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <Wire.h>               // Library to use I2C to display
+#include "SSD1306Wire.h"
 
 
-int scanTime = 1; //In seconds
-const char* ssid     = "Aqbota";
-const char* password = "KazPostBot";
+int scanTime = 3; //In seconds
+const char* ssid     = "smarthome";
+const char* password = "hardware";
 
-
+SSD1306Wire  display(0x3c, 5, 4);
 
 void setup() {
   Serial.begin(115200);
@@ -23,7 +25,18 @@ void setup() {
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
-}
+      }
+  display.init();
+  display.flipScreenVertically();
+  display.clear();
+  display.setFont(ArialMT_Plain_10);
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(0, 0, "BeInTech");
+  display.drawString(0, 10, "Cleverest Technologies");
+  display.drawString(0, 20, "Bayqaw Proximity project");
+  display.drawString(0, 30, "Extra room");
+  display.display();
 }
 
 
@@ -49,7 +62,7 @@ void loop() {
 
 
 HTTPClient http;
-http.begin("http://192.168.8.100:7777/data/right/" + message); //Specify destination for HTTP request
+http.begin("http://192.168.1.41:7777/extra/" + message); //Specify destination for HTTP request
 http.addHeader("Content-Type", "text/plain"); //Specify content-type header
 int httpResponseCode = http.GET(); //Send the actual POST request
 http.end(); //Free resources
