@@ -1,0 +1,368 @@
+Processing esp32dev (platform: espressif32; board: esp32dev; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+PLATFORM: Espressif 32 > Espressif ESP32 Dev Module
+SYSTEM: ESP32 240MHz 320KB RAM (4MB Flash)
+DEBUG: CURRENT(minimodule) EXTERNAL(minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny
+-h, olimex-jtag-tiny)
+
+Library Dependency Finder -> http://bit.ly/configure-pio-ldf
+LDF MODES: FINDER(chain) COMPATIBILITY(soft)
+Collected 25 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- <Wire> 1.0
+|-- <ESP8266_SSD1306> 4.0.0
+|   |-- <Wire> 1.0
+|-- <WiFi> 1.0
+|-- <HTTPClient> 1.1
+|   |-- <WiFi> 1.0
+|   |-- <WiFiClientSecure> 1.0
+|   |   |-- <WiFi> 1.0
+|-- <ESP32 BLE Arduino> 0.4.16
+Compiling .pioenvs/esp32dev/src/main.cpp.o
+Generating partitions .pioenvs/esp32dev/partitions.bin
+Compiling .pioenvs/esp32dev/lib836/Wire/Wire.cpp.o
+Archiving .pioenvs/esp32dev/lib836/libWire.a
+Indexing .pioenvs/esp32dev/lib836/libWire.a
+Compiling .pioenvs/esp32dev/lib072/ESP8266 and ESP32 Oled Driver for SSD1306 display_ID2978/OLEDDisplay.cpp.o
+src/main.cpp:16:20: warning: 'pServerAddress' defined but not used [-Wunused-variable]
+static BLEAddress *pServerAddress;
+^
+src/main.cpp:17:33: warning: 'pRemoteCharacteristic' defined but not used [-Wunused-variable]
+static BLERemoteCharacteristic* pRemoteCharacteristic;
+^
+Compiling .pioenvs/esp32dev/lib072/ESP8266 and ESP32 Oled Driver for SSD1306 display_ID2978/OLEDDisplayUi.cpp
+.o
+Compiling .pioenvs/esp32dev/lib919/WiFi/ETH.cpp.o
+Archiving .pioenvs/esp32dev/lib072/libESP8266 and ESP32 Oled Driver for SSD1306 display_ID2978.a
+Indexing .pioenvs/esp32dev/lib072/libESP8266 and ESP32 Oled Driver for SSD1306 display_ID2978.a
+Compiling .pioenvs/esp32dev/lib919/WiFi/WiFi.cpp.o
+
+Compiling .pioenvs/esp32dev/lib919/WiFi/WiFiAP.cpp.o
+Compiling .pioenvs/esp32dev/lib919/WiFi/WiFiClient.cpp.o
+Compiling .pioenvs/esp32dev/lib919/WiFi/WiFiGeneric.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiClient.cpp: In member f
+unction 'virtual uint8_t WiFiClient::connected()':
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiClient.cpp:440:13: warn
+ing: unused variable 'res' [-Wunused-variable]
+int res = recv(fd(), &dummy, 0, MSG_DONTWAIT);
+^
+Compiling .pioenvs/esp32dev/lib919/WiFi/WiFiMulti.cpp.o
+Compiling .pioenvs/esp32dev/lib919/WiFi/WiFiSTA.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiMulti.cpp: In member fu
+nction 'uint8_t WiFiMulti::run(uint32_t)':
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiMulti.cpp:129:27: warni
+ng: variable 'mac' set but not used [-Wunused-but-set-variable]
+uint8_t * mac;
+^
+Compiling .pioenvs/esp32dev/lib919/WiFi/WiFiScan.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiSTA.cpp: In static memb
+er function 'static void WiFiSTAClass::_smartConfigCallback(uint32_t, void*)':
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiSTA.cpp:686:30: warning
+: unused variable 'type' [-Wunused-variable]
+smartconfig_type_t * type = (smartconfig_type_t *)result;
+^
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiSTA.cpp:697:26: warning
+: unused variable 'ip' [-Wunused-variable]
+ip4_addr_t * ip = (ip4_addr_t *)result;
+^
+Compiling .pioenvs/esp32dev/lib919/WiFi/WiFiServer.cpp.o
+Compiling .pioenvs/esp32dev/lib919/WiFi/WiFiUdp.cpp.o
+Compiling .pioenvs/esp32dev/lib4a9/WiFiClientSecure/WiFiClientSecure.cpp.o
+Archiving .pioenvs/esp32dev/lib919/libWiFi.a
+Indexing .pioenvs/esp32dev/lib919/libWiFi.a
+
+Compiling .pioenvs/esp32dev/lib4a9/WiFiClientSecure/ssl_client.cpp.o
+Compiling .pioenvs/esp32dev/libf35/HTTPClient/HTTPClient.cpp.o
+Archiving .pioenvs/esp32dev/lib4a9/libWiFiClientSecure.a
+Indexing .pioenvs/esp32dev/lib4a9/libWiFiClientSecure.a
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLE2902.cpp.o
+Archiving .pioenvs/esp32dev/libf35/libHTTPClient.a
+Indexing .pioenvs/esp32dev/libf35/libHTTPClient.a
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLE2904.cpp.o
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEAddress.cpp.o
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEAdvertisedDevice.cpp.o
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEAdvertising.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEAdvertisedDevice.cpp:23:2
+0: warning: 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG="BLEAdvertisedDevice";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEBeacon.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEAdvertising.cpp:31:20: wa
+rning: 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLEAdvertising";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLECharacteristic.cpp.o
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLECharacteristicMap.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLECharacteristic.cpp: In me
+mber function 'void BLECharacteristic::setValue(float&)':
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLECharacteristic.cpp:713:17
+: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+*((float *)temp) = data32;
+^
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLECharacteristic.cpp: In me
+mber function 'void BLECharacteristic::setValue(double&)':
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLECharacteristic.cpp:719:18
+: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+*((double *)temp) = data64;
+
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEClient.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLECharacteristic.cpp: At gl
+obal scope:
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLECharacteristic.cpp:26:20:
+ warning: 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLECharacteristic";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEDescriptor.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEClient.cpp:45:20: warning
+: 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLEClient";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEDescriptorMap.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEDescriptor.cpp:23:20: war
+ning: 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLEDescriptor";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEDevice.cpp.o
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEExceptions.cpp.o
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEHIDDevice.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEDevice.cpp:36:20: warning
+: 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLEDevice";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLERemoteCharacteristic.cpp.o
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLERemoteDescriptor.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLERemoteCharacteristic.cpp:
+
+27:20: warning: 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLERemoteCharacteristic";   // The logging tag for this class.
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLERemoteService.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLERemoteDescriptor.cpp:17:2
+0: warning: 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLERemoteDescriptor";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEScan.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEScan.cpp:24:20: warning:
+'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLEScan";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLESecurity.cpp.o
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEServer.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLERemoteService.cpp:20:20:
+warning: 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLERemoteService";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEService.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEServer.cpp:26:20: warning
+: 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLEServer";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEServiceMap.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEService.cpp:31:20: warnin
+g: 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLEService"; // Tag for logging.
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEUUID.cpp.o
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEUtils.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEUUID.cpp:17:20: warning:
+
+'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLEUUID";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/BLEValue.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEValue.cpp:17:20: warning:
+ 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG="BLEValue";
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/FreeRTOS.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEUtils.cpp: In static memb
+er function 'static void BLEUtils::dumpGattServerEvent(esp_gatts_cb_event_t, esp_gatt_if_t, esp_ble_gatts_cb_
+param_t*)':
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEUtils.cpp:1736:10: warnin
+g: variable 'pWriteFlagText' set but not used [-Wunused-but-set-variable]
+char* pWriteFlagText;
+^
+Compiling .pioenvs/esp32dev/lib76e/BLE/GeneralUtils.cpp.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEUtils.cpp: At global scop
+e:
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEUtils.cpp:31:20: warning:
+ 'LOG_TAG' defined but not used [-Wunused-variable]
+static const char* LOG_TAG = "BLEUtils";  // Tag for logging.
+^
+Archiving .pioenvs/esp32dev/libFrameworkArduinoVariant.a
+Indexing .pioenvs/esp32dev/libFrameworkArduinoVariant.a
+Compiling .pioenvs/esp32dev/FrameworkArduino/Esp.cpp.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/HardwareSerial.cpp.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/IPAddress.cpp.o
+Archiving .pioenvs/esp32dev/lib76e/libBLE.a
+Compiling .pioenvs/esp32dev/FrameworkArduino/IPv6Address.cpp.o
+Indexing .pioenvs/esp32dev/lib76e/libBLE.a
+Compiling .pioenvs/esp32dev/FrameworkArduino/MD5Builder.cpp.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/Print.cpp.o
+
+Compiling .pioenvs/esp32dev/FrameworkArduino/Stream.cpp.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/StreamString.cpp.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/WMath.cpp.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/WString.cpp.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/base64.cpp.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/cbuf.cpp.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-adc.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-bt.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-dac.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-gpio.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-i2c.c.o
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-i2c.c: In function 'i2cP
+rocQueue':
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-i2c.c:1005:18: warning:
+unused variable 'tAfter' [-Wunused-variable]
+portTickType tAfter=xTaskGetTickCount();
+^
+/Users/naboo/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-i2c.c:997:18: warning: u
+nused variable 'tBefore' [-Wunused-variable]
+portTickType tBefore=xTaskGetTickCount();
+^
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-ledc.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-matrix.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-misc.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-psram.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-sigmadelta.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-spi.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-time.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-timer.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-touch.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/esp32-hal-uart.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/libb64/cdecode.c.o
+
+Compiling .pioenvs/esp32dev/FrameworkArduino/libb64/cencode.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/main.cpp.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/stdlib_noniso.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/wiring_pulse.c.o
+Compiling .pioenvs/esp32dev/FrameworkArduino/wiring_shift.c.o
+Archiving .pioenvs/esp32dev/libFrameworkArduino.a
+Indexing .pioenvs/esp32dev/libFrameworkArduino.a
+Linking .pioenvs/esp32dev/firmware.elf
+Retrieving maximum program size .pioenvs/esp32dev/firmware.elf
+Building .pioenvs/esp32dev/firmware.bin
+Checking size .pioenvs/esp32dev/firmware.elf
+Memory Usage -> http://bit.ly/pio-memory-usage
+DATA:    [==        ]  18.0% (used 59088 bytes from 327680 bytes)
+PROGRAM: [====      ]  36.5% (used 1146781 bytes from 3145728 bytes)
+Configuring upload protocol...
+AVAILABLE: esptool, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-
+tiny
+CURRENT: upload_protocol = esptool
+Looking for upload port...
+Use manually specified: /dev/tty.SLAB_USBtoUART
+Uploading .pioenvs/esp32dev/firmware.bin
+Serial port /dev/tty.SLAB_USBtoUART
+Connecting........___
+Chip is ESP32D0WDQ6 (revision 1)
+Features: WiFi, BT, Dual Core
+MAC: 30:ae:a4:43:03:08
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 921600
+Changed.
+Configuring flash size...
+Auto-detected Flash size: 4MB
+Compressed 15088 bytes to 9755...
+Wrote 15088 bytes (9755 compressed) at 0x00001000 in 0.1 seconds (effective 894.7 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 105...
+Wrote 3072 bytes (105 compressed) at 0x00008000 in 0.0 seconds (effective 793.5 kbit/s)...
+Hash of data verified.
+Compressed 8192 bytes to 47...
+Wrote 8192 bytes (47 compressed) at 0x0000e000 in 0.0 seconds (effective 2624.4 kbit/s)...
+Hash of data verified.
+Compressed 1146928 bytes to 639006...
+Wrote 1146928 bytes (639006 compressed) at 0x00010000 in 11.2 seconds (effective 821.7 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
+======================== [SUCCESS] Took 146.18 seconds ========================
+
+Linter
+Severity 	Provider 	Description	Line
+Git
+Unstaged Changes
+Stage All
+PlatformIO/MultiUUIDNode/Multiple Service Node/.gitignore
+PlatformIO/MultiUUIDNode/Multiple Service Node/.travis.yml
+PlatformIO/MultiUUIDNode/Multiple Service Node/custompart.csv
+PlatformIO/MultiUUIDNode/Multiple Service Node/lib/readme.txt
+PlatformIO/MultiUUIDNode/Multiple Service Node/platformio.ini
+PlatformIO/MultiUUIDNode/Multiple Service Node/src/main.cpp
+PlatformIO/BLENode/.gitignore
+PlatformIO/BLENode/.travis.yml
+PlatformIO/Report#1/DistanceAnalyser/.gitignore
+PlatformIO/Report#1/DistanceAnalyser/.travis.yml
+PlatformIO/Report#1/DistanceAnalyser/build.log
+PlatformIO/Report#1/DistanceAnalyser/custompart.csv
+PlatformIO/Report#1/DistanceAnalyser/lib/readme.txt
+PlatformIO/Report#1/DistanceAnalyser/platformio.ini
+PlatformIO/Report#1/DistanceAnalyser/src/main.cpp
+PlatformIO/Report#1/Multiple Service Node/.gitignore
+PlatformIO/Report#1/Multiple Service Node/.travis.yml
+PlatformIO/Report#1/Multiple Service Node/custompart.csv
+PlatformIO/Report#1/Multiple Service Node/lib/readme.txt
+PlatformIO/Report#1/Multiple Service Node/platformio.ini
+PlatformIO/Report#1/Multiple Service Node/src/main.cpp
+PlatformIO/Report#1/NakedServer/.gitignore
+PlatformIO/Report#1/NakedServer/.travis.yml
+PlatformIO/Report#1/NakedServer/custompart.csv
+PlatformIO/Report#1/NakedServer/lib/readme.txt
+PlatformIO/Report#1/NakedServer/platformio.ini
+PlatformIO/Report#1/NakedServer/src/main.cpp
+PlatformIO/Report#1/NodesCalculation/.gitignore
+PlatformIO/Report#1/NodesCalculation/.travis.yml
+PlatformIO/Report#1/NodesCalculation/build.log
+PlatformIO/Report#1/NodesCalculation/custompart.csv
+PlatformIO/Report#1/NodesCalculation/lib/readme.txt
+PlatformIO/Report#1/NodesCalculation/platformio.ini
+PlatformIO/Report#1/NodesCalculation/src/main.cpp
+Staged Changes
+
+Commit message
+
+
+Commit to master
+72
+dr.cleverest@gmail.com
+Okay, just backup
+Undo
+16h
+dr.cleverest@gmail.com
+Finally finished
+16h
+dr.cleverest@gmail.com
+Finally working GATT server with GATT client
+16h
+dr.cleverest@gmail.com
+Backup
+5d
+dr.cleverest@gmail.com
+Added some comments to the main.cpp, increased flash size of the ESP32.
+12d
+dr.cleverest@gmail.com
+The second one, forgot about main.cpp, LOL
+12d
+dr.cleverest@gmail.com
+First push from PlatformIO, working on flash size
+12d
+dr.cleverest@gmail.com
+Bunch update before PlatformIO
+12d
+dr.cleverest@gmail.com
+Starting to use ESP-IDF
+18d
+dr.cleverest@gmail.com
+Update README.md
+19d
+PIO Buildbuild.log000266:1
+LFUTF-8Plain Text
+masterFetch34 files
