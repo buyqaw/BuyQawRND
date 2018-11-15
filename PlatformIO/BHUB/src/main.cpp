@@ -15,6 +15,9 @@ SSD1306Wire  display(0x3c, 5, 4);
 int RSSIL = 0;
 BLEScan* pBLEScan = NULL;
 
+int MIN = -60;
+int MAX = -80;
+
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 std::string rxValueP = "";
@@ -24,28 +27,40 @@ int scanTime = 1;
 String macs[5] = {"0", "0", "0", "0", "0"};
 String opened[5] = {"0", "0", "0", "0", "0"};
 
-// Characteristics of WiFi
-const char* ssid = "BHUB server";
-const char* password =  "123123123";
-
-// Initialize web server on 80th port
-WiFiServer server(8000);
-
+const int speak = 13;
+const int door = 12;
+const int red = 5;
+const int green = 18;
+const int blue = 19;
 
 // Function to open door
 void open(){
-  delay(5000);
+  digitalWrite (door, LOW);
+  digitalWrite (speak, HIGH);
+  digitalWrite (blue, LOW);
+  digitalWrite (green, HIGH);
   Serial.println("Opened");
+  delay(5000);
+  digitalWrite (blue, HIGH);
+  digitalWrite (green, LOW);
+  digitalWrite (door, HIGH);
+  digitalWrite (speak, LOW);
 }
 
 void voice(){
-  int a = 0;
+  digitalWrite (speak, HIGH);
+  delay(1000);
+  digitalWrite (speak, LOW);
+
 }
 
 void add_new_user(){
-  BLEScanResults foundDevices = pBLEScan->start(scanTime);
+  Serial.println("Adding new users");
+  digitalWrite (red, HIGH);
+  digitalWrite (blue, LOW);
+  BLEScanResults foundDevices = pBLEScan->start(5);
   int count = foundDevices.getCount(); // Define number of found devices
-  Serial.print("Count is: ");
+  Serial.print("Device`s number is: ");
   Serial.println(count);
   for (int i = 0; i < count; i++)
   {
@@ -55,26 +70,38 @@ void add_new_user(){
                 for (int b = 0; b < 17; b++){
                   mac[b] = d.getAddress().toString()[b];
                 }
+      Serial.print("Device`s mac address: ");
+      Serial.println(mac);
+      Serial.print("Device`s RSSI is: ");
+      Serial.println(d.getRSSI());
       for (int x = 0; x < 5; x++){
         if (macs[x] == "0"){
+          Serial.print("There is place for mac addr: ");
+          Serial.print("Index is - ");
+          Serial.print(x);
+          Serial.print(", value is - ");
+          Serial.println(macs[x]);
         // Serial.println(macs[x]);
-      if(int(d.getRSSI()) > (-50)){ // If device has our name and UUID
+      if(int(d.getRSSI()) > (MIN)){ // If device has our name and UUID
+        Serial.print("New user`s mac adrr: ");
         macs[x] = mac;
+        Serial.println(mac);
         voice();
         Serial.print("New user is: ");
         Serial.println(macs[x]);
       }
+    digitalWrite (blue, HIGH);
+    digitalWrite (red, LOW);
     break;}
     }
   }
+  Serial.println("Finished adding new users");
 }
 
 
 // Search our devices
 int scan_env(){
-  voice();
-  BLEScanResults foundDevices = pBLEScan->start(5);
-  voice();
+  BLEScanResults foundDevices = pBLEScan->start(scanTime);
   int count = foundDevices.getCount(); // Define number of found devices
   Serial.print("Count is: ");
   Serial.println(count);
@@ -89,19 +116,17 @@ int scan_env(){
     if(d.haveName()){ // If device has name
 
       Serial.println(int(d.getRSSI()));
-      if(d.getName() == "NodeL" and int(d.getRSSI()) > (-80)){ // If device has our name and UUID
-        Serial.println(int(d.getRSSI()));
+      if(d.getName() == "NodeL" and int(d.getRSSI()) > (MAX)){ // If device has our name and UUID
         return 1;
       }
-      if(d.getName() == "Node" and int(d.getRSSI()) > (-50)){ // If device has our name and UUID
-        Serial.println(int(d.getRSSI()));
+      if(d.getName() == "Node" and int(d.getRSSI()) > (MIN)){ // If device has our name and UUID
         return 1;
       }
 
       }
       for (int x = 0; x < 5; x++){
         // Serial.println(macs[x]);
-      if(mac == macs[x] and int(d.getRSSI()) > (-50)){ // If device has our name and UUID
+      if(mac == macs[x] and int(d.getRSSI()) > (MIN)){ // If device has our name and UUID
         Serial.println(int(d.getRSSI()));
         return 1;
       }
@@ -112,68 +137,25 @@ int scan_env(){
 
 
 void setup() {
+  pinMode (red, OUTPUT);
+  pinMode (blue, OUTPUT);
+  pinMode (green, OUTPUT);
+  pinMode (speak, OUTPUT);
+  pinMode (door, OUTPUT);
+  digitalWrite (door, HIGH);
+  digitalWrite (blue, HIGH);
   Serial.begin(115200);
-  // Create access point
-  WiFi.softAP(ssid, password);
-  // Begin server
-  server.begin();
-  Serial.print("My IP is: ");
-  Serial.println(WiFi.softAPIP());
-
   Serial.println("Scanning...");
   BLEDevice::init("Node"); // Initialize BLE device
   BLEDevice::setPower(ESP_PWR_LVL_P7);
   pBLEScan = BLEDevice::getScan(); //create new scan
   pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
+  add_new_user();
 }
 
 void loop() {
-
-  WiFiClient client = server.available();   // listen for incoming clients
-
-  if (client) {                             // if you get a client,
-    Serial.println("New Client.");           // print a message out the serial port
-    String currentLine = "";                // make a String to hold incoming data from the client
-    while (client.connected()) {            // loop while the client's connected
-      if (client.available()) {             // if there's bytes to read from the client,
-        char c = client.read();             // read a byte, then
-        Serial.write(c);                    // print it out the serial monitor
-        if (c == '\n') {                    // if the byte is a newline character
-
-          // if the current line is blank, you got two newline characters in a row.
-          // that's the end of the client HTTP request, so send a response:
-          if (currentLine.length() == 0) {
-            // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
-            // and a content-type so the client knows what's coming, then a blank line:
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:text/html");
-            client.println();
-
-            // the content of the HTTP response follows the header:
-            client.print("Click <a href=\"/0\">here</a> to add new user<br>");
-
-            // The HTTP response ends with another blank line:
-            client.println();
-            // break out of the while loop:
-            break;
-          } else {    // if you got a newline, then clear currentLine:
-            currentLine = "";
-          }
-        } else if (c != '\r') {  // if you got anything else but a carriage return character,
-          currentLine += c;      // add it to the end of the currentLine
-        }
-        if (currentLine.endsWith("GET /0")) {
-          add_new_user();
-          }
-      }
-    }
-    // close the connection:
-    client.stop();
-  }else{
-
   int Is = scan_env();
   if(Is == 1){
     open();
-  }
 }
 }
