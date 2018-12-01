@@ -15,8 +15,8 @@ SSD1306Wire  display(0x3c, 5, 4);
 int RSSIL = 0;
 BLEScan* pBLEScan = NULL;
 
-int MIN = -60;
-int MAX = -80;
+int MIN = -70;
+int MAX = -90;
 
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
@@ -27,11 +27,11 @@ int scanTime = 1;
 String macs[5] = {"0", "0", "0", "0", "0"};
 String opened[5] = {"0", "0", "0", "0", "0"};
 
-const int speak = 13;
-const int door = 12;
-const int red = 5;
-const int green = 18;
-const int blue = 19;
+const int speak = 16;
+const int door = 17;
+const int red = 27;
+const int green = 14;
+const int blue = 12;
 
 // Function to open door
 void open(){
