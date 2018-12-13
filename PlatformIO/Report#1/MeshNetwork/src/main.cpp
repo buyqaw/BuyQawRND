@@ -15,8 +15,16 @@
 #include <ESPAsyncWebServer.h>
 
 
+// Settings
+
+String worker = "0000fef5-0000-1000-8000-00805f9b34fb";
+String mac = "24:0a:64:43:77:df";
+int MIN = -70;
+int MAX = -90;
+int INROOM = -80;
+
 #define   MESH_SSID       "BUYQAW-MESH"
-#define   MESH_PASSWORD   "somethingSneaky"
+#define   MESH_PASSWORD   "beintech"
 #define   MESH_PORT       7777
 
 // Display and Scan activities
@@ -35,8 +43,6 @@ Scheduler     userScheduler; // to control your personal task
 painlessMesh  mesh;
 AsyncWebServer server(80);
 
-String worker = "0000fef5-0000-1000-8000-00805f9b34fb";
-
 IPAddress myAPIP(0,0,0,0);
 
 bool calc_delay = false;
@@ -50,12 +56,83 @@ String data = "Hello World";
 // Schedule tasks
 void scanBLE();
 void sendMessage();
+void Skud();
 
 Task taskSendMessage( 5000, TASK_FOREVER, &sendMessage );
 Task Scan_all( 5000, TASK_FOREVER, &scanBLE );
+Task SKUD( 500, TASK_FOREVER, &Skud );
+
+
+
+int scanTime = 1;
+
+
+const int speak = 16;
+const int door = 17;
+const int red = 27;
+const int green = 14;
+const int blue = 12;
+
+// Function to open door
+void open(){
+  digitalWrite (door, LOW);
+  digitalWrite (speak, HIGH);
+  digitalWrite (blue, LOW);
+  digitalWrite (green, HIGH);
+  Serial.println("Opened");
+  delay(5000);
+  digitalWrite (blue, HIGH);
+  digitalWrite (green, LOW);
+  digitalWrite (door, HIGH);
+  digitalWrite (speak, LOW);
+}
+
+void voice(){
+  digitalWrite (speak, HIGH);
+  delay(1000);
+  digitalWrite (speak, LOW);
+
+}
+
+// Search our devices
+int scan_env(){
+  BLEScanResults foundDevices = pBLEScan->start(scanTime);
+  int count = foundDevices.getCount(); // Define number of found devices
+  Serial.print("Count is: ");
+  Serial.println(count);
+  for (int i = 0; i < count; i++)
+  {
+    BLEAdvertisedDevice d = foundDevices.getDevice(i); // Define found device
+    // int RSSIL = d.getRSSI(); // Get it's signal level [no need now, but for future]
+
+          for (int b = 0; b < 17; b++){
+                  mac[b] = d.getAddress().toString()[b];
+                }
+    if(d.haveName()){ // If device has name
+
+      Serial.println(int(d.getRSSI()));
+      if(d.getName() == "NodeL" and int(d.getRSSI()) > (MAX)){ // If device has our name and UUID
+        return 1;
+      }
+      if(d.getName() == "Node" and int(d.getRSSI()) > (MIN)){ // If device has our name and UUID
+        return 1;
+      }
+
+      }
+  }
+  return 0;
+}
 
 
 void setup() {
+  pinMode (red, OUTPUT);
+  pinMode (blue, OUTPUT);
+  pinMode (green, OUTPUT);
+  pinMode (speak, OUTPUT);
+  pinMode (door, OUTPUT);
+  digitalWrite (door, HIGH);
+  digitalWrite (blue, HIGH);
+
   Serial.begin(115200);
   datas.push_back(-200);
 
@@ -105,7 +182,7 @@ void setup() {
         indexofmax = k;
       }
     }
-    if(max>-80){
+    if(max>INROOM){
       data = "Worker is in the room number: <b>";
       std::list<uint32_t> modes = mesh.getNodeList();
       int sizeofnodes = mesh.getNodeList().size();
@@ -216,4 +293,11 @@ void nodeTimeAdjustedCallback(int32_t offset) {
 
 void delayReceivedCallback(uint32_t from, int32_t delay) {
   // Serial.printf("Delay to node %u is %d us\n", from, delay);
+}
+
+void Skud() {
+  int Is = scan_env();
+  if(Is == 1){
+    open();
+  }
 }
