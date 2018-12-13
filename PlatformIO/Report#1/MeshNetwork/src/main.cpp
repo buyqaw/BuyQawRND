@@ -173,6 +173,7 @@ void setup() {
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     int len = datas.size();
+    Serial.println(len);
     int k = 0;
     int max = -200;
     int indexofmax = 0;
@@ -181,6 +182,7 @@ void setup() {
         max = datas[k];
         indexofmax = k;
       }
+      k += 1;
     }
     if(max>INROOM){
       data = "Worker is in the room number: <b>";
