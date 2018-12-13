@@ -9,468 +9,129 @@
 #include <WiFi.h>               // Library to use WiFi
 #include <HTTPClient.h>         // Library to GET/POST in HTTP
 #include <BLE2902.h>            // Characteristics of standard BLE device
+#include <painlessMesh.h>       // Mesh network based on Wi-Fi
 
-// The characteristic of services created for mesh network
-static BLEUUID    charUUID_P("00000001-B5C3-F393-E0A9-E50E24DCCA9E"); // To Parent node
-static BLEUUID    charUUID_D("00000002-B5C3-F393-E0A9-E50E24DCCA9E"); // To daughter node
-std::string SERVICE_UUID = "F0000000-B5C3-F393-E0A9-E50E24DCCA9E"; // Service standard UUID
 
-// Creating global variables for BLE device characteristics
-static BLEAddress *pServerAddress;
-static BLERemoteCharacteristic* pRemoteCharacteristic;
-BLEService *pService = NULL;
-BLEServer *pServer = NULL;
-BLEAdvertising* pAdvertising = NULL;
-BLECharacteristic * pTxCharacteristic;
-BLECharacteristic * dTxCharacteristic;
+#define   MESH_SSID       "BUYQAW-MESH"
+#define   MESH_PASSWORD   "somethingSneaky"
+#define   MESH_PORT       7777
 
-// Is devices connected or not
-bool deviceConnected = false;
-bool oldDeviceConnected = false;
+// Display and Scan activities
+SSD1306Wire  display(0x3c, 5, 4);
+int RSSIL = 0;
+BLEScan* pBLEScan = NULL;
 
-// String for data from/to Parent and Daughters
-std::string rxValueP = "     ";
-std::string rxValueD = "     ";
+// Prototypes
+void receivedCallback(uint32_t from, String & msg);
+void newConnectionCallback(uint32_t nodeId);
+void changedConnectionCallback();
+void nodeTimeAdjustedCallback(int32_t offset);
+void delayReceivedCallback(uint32_t from, int32_t delay);
 
-// Variables to control mesh network
-//TODO: change it
-int scanTime = 5; // Scan time in seconds
-int serverTime = 10000; // Server uptime in milliseconds
+Scheduler     userScheduler; // to control your personal task
+painlessMesh  mesh;
 
-// Variables of mesh network
-int maxi_neighbour = 0;
-bool isParent = false;
+bool calc_delay = false;
+SimpleList<uint32_t> nodes;
 
-// Characteristics of WiFi and HTTP server
-const char* ssid = "CleverestTech";
-String ssidS = "CleverestTech"; // Please, dublicate it
-const char* password =  "Robotics1sTheBest";
-char* IP = "http://192.168.1.109/";
+String signal = "";
 
-// Changing device statuses if anybody connect/disconnect
-class MyServerCallbacks: public BLEServerCallbacks {
-    void onConnect(BLEServer* pServer) {
-      deviceConnected = true;
-    };
-    void onDisconnect(BLEServer* pServer) {
-      deviceConnected = false;
-    }
-};
+// Schedule tasks
+void scanBLE();
+void sendMessage();
+Task taskSendMessage( 5000, TASK_FOREVER, &sendMessage );
+Task Scan_all( 5000, TASK_FOREVER, &scanBLE );
 
-// Callback object if parent writes anything
-class MyCallbacksP: public BLECharacteristicCallbacks {
-    void onWrite(BLECharacteristic *pCharacteristic) {
-      std::string rxValuePraw = pCharacteristic->getValue();
-      if (rxValuePraw.length() > 0) {
-        rxValueP = rxValuePraw;
-        Serial.println("New value from parent is: ");
-        for(int i = 0; i<rxValueP.length(); i++){
-          Serial.print(char(rxValueP[i]));
-        }
-        Serial.println(";");
-      }
-    }
-};
 
-// Callback object if daughter writes anything
-class MyCallbacksD: public BLECharacteristicCallbacks {
-    void onWrite(BLECharacteristic *pCharacteristic) {
-      std::string rxValueDraw = pCharacteristic->getValue();
-      if (rxValueDraw.length() > 0) {
-        rxValueD = rxValueD + rxValueDraw;
-        Serial.println("New value from daughter is: ");
-        for(int i = 0; i<rxValueD.length(); i++){
-          Serial.print(char(rxValueD[i]));
-        }
-        Serial.println(";");
-      }
-    }
-};
+void setup() {
+  Serial.begin(115200);
 
-// Function to take data from HTTP server
-void TakeFromInternet(){
-  delay(4000);   //Delay needed before calling the WiFi.begin
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) { //Check for the connection
-    delay(1000);
-    Serial.println("Connecting to WiFi..");
-  }
-  Serial.println("Connected to the WiFi network");
-
-  if(WiFi.status()== WL_CONNECTED){   //Check WiFi connection status
-   HTTPClient http;
-   http.begin(IP);  //Specify destination for HTTP request
-   http.addHeader("Content-Type", "text/plain"); //Specify content-type header
-   String rxValuePraw;
-   for(int v = 0; v < rxValueP.length(); v++){
-     rxValuePraw[v] = char(rxValueP[v]);
-   }
-   Serial.print("Responce in memory is: ");
-   for(int v = 0; v < rxValueP.length(); v++){
-     Serial.print(char(rxValueP[v]));
-   }
-   Serial.println(" ");
-   Serial.print("Our responce is: ");
-   Serial.println(rxValuePraw);
-   int httpResponseCode = http.POST(rxValuePraw);   //Send the actual POST request
-   if(httpResponseCode>0){
-    String rxValueDraw = http.getString();  //Get the response to the request
-    Serial.print("Data from server is: ");
-    Serial.println(rxValueDraw);
-    for(int i = 0; i < rxValueDraw.length(); i++){
-      rxValueD[i] = rxValueDraw[i];
-    }
-    Serial.print("Server info is: ");
-    Serial.print(char(rxValueD[0]));
-    Serial.print(char(rxValueD[1]));
-    Serial.print(char(rxValueD[2]));
-    Serial.print(char(rxValueD[3]));
-    Serial.println(char(rxValueD[4]));
-
-    Serial.print("Return code is: ");
-    Serial.println(httpResponseCode);   //Print return code
-   }else{
-    Serial.print("Error on sending POST: ");
-    Serial.println(httpResponseCode);
-   }
-   http.end();  //Free resources
- }else{
-    Serial.println("Error in WiFi connection");
- }
- WiFi.disconnect();
-}
-
-// Function to write to parent
-void Write2ServerP(std::string adress, std::string serviceUUID){
-  pServerAddress = new BLEAddress(adress);
-  delay(1000);
-  Serial.print("Forming a connection to ");
-  Serial.println(pServerAddress->toString().c_str());
-  BLEClient* pClient = BLEDevice::createClient();
-  Serial.println("Created client");
-  pClient->connect(*pServerAddress);
-  Serial.println("Connected to server");
-  // Obtain a reference to the service we are after in the remote BLE server.
- BLERemoteService* pRemoteService = pClient->getService(serviceUUID);
- if (pRemoteService == nullptr) {
-   Serial.print("Failed to find our service UUID");
- }
- Serial.println(" - Found our service");
-
- // Obtain a reference to the characteristic in the service of the remote BLE server.
- pRemoteCharacteristic = pRemoteService->getCharacteristic(charUUID_P);
- if (pRemoteCharacteristic == nullptr) {
-   Serial.print("Failed to find our characteristic UUID");
- }
- Serial.println(" - Found our characteristic");
-
- pRemoteCharacteristic->writeValue(rxValueD.c_str(), rxValueD.length());
- Serial.println("I wrote to parent this:");
- for(int i = 0; i<rxValueD.length(); i++){
-   Serial.print(char(rxValueD[i]));
- }
- Serial.println(";");
- //pClient->clearServices();
-}
-
-// Function to write to daughter
-void Write2ServerD(std::string adress, std::string serviceUUID){
-  pServerAddress = new BLEAddress(adress);
-  delay(1000);
-  Serial.print("Forming a connection to ");
-  Serial.println(pServerAddress->toString().c_str());
-  BLEClient* pClient = BLEDevice::createClient();
-  Serial.println("Created client");
-  pClient->connect(*pServerAddress);
-  Serial.println("Connected to server");
-  // Obtain a reference to the service we are after in the remote BLE server.
- BLERemoteService* pRemoteService = pClient->getService(serviceUUID);
- if (pRemoteService == nullptr) {
-   Serial.print("Failed to find our service UUID");
- }
- Serial.println(" - Found our service");
-
- // Obtain a reference to the characteristic in the service of the remote BLE server.
- pRemoteCharacteristic = pRemoteService->getCharacteristic(charUUID_D);
- if (pRemoteCharacteristic == nullptr) {
-   Serial.print("Failed to find our characteristic UUID");
- }
- Serial.println(" - Found our characteristic");
-
- pRemoteCharacteristic->writeValue(rxValueP.c_str(), rxValueP.length());
- Serial.println("I wrote to daughter this:");
- for(int i = 0; i<rxValueP.length(); i++){
-   Serial.print(char(rxValueP[i]));
- }
- Serial.println(";");
-}
-
-// Change data from Daughter
-void DoSmtWithData(){
-  String rxValuePraw;
-  //rxValueP -> comes from parent goes to daughter
-  //rxValueD -> comes from daughter goes to parent
-  if(rxValueD[0] == SERVICE_UUID[0] and rxValueD[1] == SERVICE_UUID[1]){
-    Serial.println("We have command from HTTP server");
-    if(rxValueD[2] == 'S'){
-      Serial.println("Command is sumation");
-      int first = int(char(rxValueD[3])) - 48;
-      int second = int(char(rxValueD[4])) - 48;
-      int ans = first + second;
-      Serial.print("Answer is: ");
-      Serial.println(ans);
-      rxValuePraw = String(SERVICE_UUID[0]) + String(SERVICE_UUID[1]) + String(ans);
-      Serial.println(rxValuePraw);
-    }
-  }
-  if(rxValueD[0] == 'A' and rxValueD[1] == 'A'){
-    Serial.println("We have command from HTTP server for all");
-    if(rxValueD[2] == 'S'){
-      Serial.println("Command is sumation");
-      int first = int(char(rxValueD[3])) - 48;
-      int second = int(char(rxValueD[4])) - 48;
-      int ans = first + second;
-      Serial.print("Answer is: ");
-      Serial.println(ans);
-      rxValuePraw = String(SERVICE_UUID[0]) + String(SERVICE_UUID[1]) + String(ans);
-      Serial.println(rxValuePraw);
-    }
-  }
-  std::string ans = "     ";
-  for(int k = 0; k < rxValuePraw.length(); k++){
-    ans[k] = char(rxValuePraw[k]);
-  }
-  Serial.print("Value in function: ");
-  for(int v = 0; v < rxValueP.length(); v++){
-    Serial.print(char(ans[v]));
-  }
-  Serial.println(" ");
-  rxValueP = ans + rxValueP;
-  Serial.print("Wrote to memory: ");
-  for(int v = 0; v < rxValueP.length(); v++){
-    Serial.print(char(rxValueP[v]));
-  }
-  Serial.println(" ");
-}
-
-// BLE server (take data from daughter and parent)
-void server(){
-  Serial.println("Server started");
-  // Start advertising
-  pAdvertising = pServer->getAdvertising();
-  pAdvertising->start();
-  Serial.println("Advertize started");
-  delay(serverTime);
-  pAdvertising->stop();
-}
-
-//Define priority
-void define_priority(){
   BLEDevice::init("Node"); // Initialize BLE device
-  BLEDevice::setPower(ESP_PWR_LVL_P7); // Set power level
-  BLEScan* pBLEScan = BLEDevice::getScan(); //create new scan
-  pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
-  BLEScanResults foundDevices = pBLEScan->start(scanTime); // List of devices
+  // BLEDevice::setPower(ESP_PWR_LVL_P7);
+  pBLEScan = BLEDevice::getScan(); //create new scan
+  // pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
+  // Serial.println("BLE scan activated");
+  mesh.setDebugMsgTypes(ERROR | DEBUG | CONNECTION);  // set before init() so that you can see startup messages
+
+  mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
+  mesh.onReceive(&receivedCallback);
+  mesh.onNewConnection(&newConnectionCallback);
+  mesh.onChangedConnections(&changedConnectionCallback);
+  mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
+  mesh.onNodeDelayReceived(&delayReceivedCallback);
+
+  userScheduler.addTask( taskSendMessage );
+  taskSendMessage.enable();
+  userScheduler.addTask( Scan_all );
+  Scan_all.enable();
+  // Serial.println("Mesh is activated");
+
+  display.init();
+  display.flipScreenVertically();
+  display.clear();
+  display.setFont(ArialMT_Plain_10);
+    // clear the display
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(0, 0, "BeInTech");
+  display.drawString(0, 10, "Cleverest Technologies");
+  display.drawString(0, 20, "Bayqaw project");
+  display.drawString(0, 30, "Node ID:");
+  String Level = String(mesh.getNodeId());
+  display.drawStringMaxWidth(0, 40, 128, Level);
+  display.display();
+}
+
+void loop() {
+  userScheduler.execute(); // it will run mesh scheduler as well
+  mesh.update();
+}
+
+void sendMessage() {
+  String msg = "!ID: ";
+  msg += mesh.getNodeId();
+  msg += "- ";
+  msg += signal;
+  mesh.sendBroadcast(msg);
+  Serial.println(msg);
+  signal = "";
+}
+
+
+void scanBLE(){
+  BLEScanResults foundDevices = pBLEScan->start(1);
   int count = foundDevices.getCount(); // Define number of found devices
-  // Define local variable for UUID of parent node
-  std::string parent;
-  // Define local variable to priority of parent node
-  int parent_max = 0;
-  // For loop to define highest priority node
-  if(count>0){
   for (int i = 0; i < count; i++)
   {
     BLEAdvertisedDevice d = foundDevices.getDevice(i); // Define found device
 
     if(d.haveServiceUUID()){
-      Serial.println("Devices are: ");
-      for(int j = 0; j < 36; j++){
-        Serial.print(char(d.getServiceUUID().toString()[j]));
+      for(int i = 0; i < 36; i++){
+        signal += String(char(d.getServiceUUID().toString()[i]));
       }
-      Serial.println(";");
+      signal += ":";
     }
-    // int RSSIL = d.getRSSI(); // Get it's signal level [no need now, but for future]
-      if(d.haveServiceUUID()){ // If device has our UUID
-        if(char(d.getServiceUUID().toString()[9]) == char('b') and
-            char(d.getServiceUUID().toString()[11]) == char('c')){
-              Serial.println("Here is our device");
-              std::string Parentraw = d.getServiceUUID().toString(); // Define it's UUID
-              // Define buffer to UUID transformation
-              char Buffer;
-              Buffer = Parentraw[0];
-              // Define value of UUID priority
-              int Buf = int(Buffer);
-              Serial.print("Buf is: ");
-              Serial.println(Buf);
-              // If priority is higher than local maxima than new parent is defined
-              if(Buf>parent_max){
-                parent_max = Buf;
-                Serial.print("Parentmax is: ");
-                Serial.println(parent_max);
-                parent = Parentraw;
-              }
-        }
-      }
-  }
-  if(parent_max>0){
-    if(parent[0] == 'a'){
-      SERVICE_UUID[0] = '9';
-    }
-    else{
-      SERVICE_UUID[0] = char(int(parent[0])-1);
-    }
-    // For loop to define same priority nodes
-    for (int i = 0; i < count; i++)
-    {
-      BLEAdvertisedDevice d = foundDevices.getDevice(i); // Define found device
-      // int RSSIL = d.getRSSI(); // Get it's signal level [no need now, but for future]
-        if(d.haveServiceUUID()){ // If device has our name and UUID
-          if(char(d.getServiceUUID().toString()[9]) == char('b') and
-              char(d.getServiceUUID().toString()[11]) == char('c')){
-                std::string Parentraw = d.getServiceUUID().toString(); // Define it's UUID
-                // Define buffer to UUID transformation
-                char Buffer;
-                Buffer = Parentraw[0];
-
-                if(Buffer == char(SERVICE_UUID[0])){
-                  if(maxi_neighbour < int(char(Parentraw[1]))){
-                    maxi_neighbour = int(char(Parentraw[1]));
-                    if(maxi_neighbour == 57){
-                      SERVICE_UUID[1] = 'a';
-                    }
-                    else{
-                      SERVICE_UUID[1] = char(int(maxi_neighbour + 1));
-                      Serial.print("Service UUID 1 is: ");
-                      Serial.println(SERVICE_UUID[1]);
-                    }
-                  }
-                }
-                // If priority is higher than local maxima than new parent is defined
-            }
-        }
-      }
-    }
+    signal += String(d.getRSSI());
+    signal += ";";
   }
 }
 
-// Write values to other servers
-void client(){
-  BLEScan* pBLEScan = BLEDevice::getScan(); //create new scan
-  pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
-  BLEScanResults foundDevices = pBLEScan->start(scanTime);
-  int count = foundDevices.getCount(); // Define number of found devices
-  Serial.println("Number of found devices is:");
-  Serial.println(count);
-  // Define local variable for UUID of parent node
-  char parent[3];
-  parent[2] = '\0';
-  // Define local variable to priority of parent node
-  int parent_max = 0;
-  // For loop to define highest priority node
-  for (int i = 0; i < count; i++)
-  {
-    BLEAdvertisedDevice d = foundDevices.getDevice(i); // Define found device
-    // int RSSIL = d.getRSSI(); // Get it's signal level [no need now, but for future]
-    if(d.haveServiceUUID()){ // If device has our UUID
-      if(char(d.getServiceUUID().toString()[9]) == char('b') and
-          char(d.getServiceUUID().toString()[11]) == char('c')){ // If device has our UUID
-        std::string UUIDraw = d.getServiceUUID().toString(); // Define it's UUID
-          // If device is our parent - send data
-          if(int(char(UUIDraw[0]))>int(char(SERVICE_UUID[0]))){
-            std::string adress = d.getAddress().toString();
-            Write2ServerP(adress, UUIDraw);
-          // If device is our daughter - send data
-          if(int(char(UUIDraw[0]))<int(char(SERVICE_UUID[0]))){
-            std::string adress = d.getAddress().toString();
-            Write2ServerD(adress, UUIDraw);
-          }
-        }
-      }
-    }
-  }
+void receivedCallback(uint32_t from, String & msg) {
+  Serial.printf("%s\n", msg.c_str());
 }
 
-// Standard setup function
-void setup(){
-  delay(20000);
-  Serial.begin(115200);
-  Serial.println("Searching for other devices to define priority");
-  // Define priority level of our device
-  define_priority();
-
-  // Define is node parent
-  std::string parentLetter = "F";
-  if(parentLetter[0] == SERVICE_UUID[0]){
-        Serial.println("I am parent node now");
-        isParent = true;
-  }
-
-  // Write our UUID in serial
-  Serial.println("My UUID is: ");
-  for(int i = 0; i<SERVICE_UUID.length(); i++){
-    Serial.print(char(SERVICE_UUID[i]));
-  }
-  Serial.println(";");
-
-  // Create the BLE Server to advertize our device's priority
-  pServer = BLEDevice::createServer();
-  pServer->setCallbacks(new MyServerCallbacks());
-
-  // Create the BLE Service for Parent node
-  pService = pServer->createService(SERVICE_UUID);
-  BLECharacteristic * pRxCharacteristic = pService->createCharacteristic(
-											charUUID_P,
-											BLECharacteristic::PROPERTY_WRITE
-										);
-  pRxCharacteristic->setCallbacks(new MyCallbacksP());
-
-  // Create the BLE Service for daughter nodes
-  BLECharacteristic * dRxCharacteristic = pService->createCharacteristic(
-                      charUUID_D,
-                      BLECharacteristic::PROPERTY_WRITE
-                    );
-  dRxCharacteristic->setCallbacks(new MyCallbacksD());
-
-  // Start Server's service
-  pService->start();
-
-  // Add advertizing
-  pAdvertising = pServer->getAdvertising();
-
-  // Show our UUID
-  pAdvertising->addServiceUUID(SERVICE_UUID);
-
-  // Start advertizing
-  pAdvertising->start();
-  Serial.println("Advertize started for 5 minutes");
-
-  // Wait 5 minutes
-  // TODO: change it
-  delay(30000);
-
-  // Stop server
-  pAdvertising->stop();
+void newConnectionCallback(uint32_t nodeId){
+  // Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
 }
 
-// Always run loop of device
-void loop(){
+void changedConnectionCallback() {
+  // Serial.printf("Changed connections %s\n", mesh.subConnectionJson().c_str());
+}
 
-  // Create server to collect data
-  Serial.println("I am server now for 20s, waiting for information");
-  server();
-  delay(1000);
+void nodeTimeAdjustedCallback(int32_t offset) {
+  // Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(), offset);
+}
 
-  // If we are Parent node, take data from HTTP server
-  if(isParent == true){
-    TakeFromInternet();
-    delay(1000);
-  }
-
-  // Do smt with data
-  DoSmtWithData();
-
-  // Create client to write data
-  Serial.println("I am client now, writing information to servers");
-  client();
-  delay(1000);
+void delayReceivedCallback(uint32_t from, int32_t delay) {
+  // Serial.printf("Delay to node %u is %d us\n", from, delay);
 }
