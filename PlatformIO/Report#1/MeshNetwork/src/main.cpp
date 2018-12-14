@@ -18,7 +18,7 @@
 // Settings
 
 String worker = "0000fef5-0000-1000-8000-00805f9b34fb";
-String mac = "24:0a:64:43:77:df";
+String mac = "12:3b:6a:1b:56:77";
 int MIN = -70;
 int MAX = -90;
 int INROOM = -80;
@@ -57,11 +57,14 @@ String data = "Hello World";
 void scanBLE();
 void sendMessage();
 void Skud();
+void silence();
+void closeit();
 
-Task taskSendMessage( 5000, TASK_FOREVER, &sendMessage );
+Task taskSendMessage( 8000, TASK_FOREVER, &sendMessage );
 Task Scan_all( 5000, TASK_FOREVER, &scanBLE );
 Task SKUD( 500, TASK_FOREVER, &Skud );
-
+Task Close( 5000, 1, &closeit );
+Task Silence( 500, 1, &silence );
 
 
 int scanTime = 1;
@@ -79,8 +82,11 @@ void open(){
   digitalWrite (speak, HIGH);
   digitalWrite (blue, LOW);
   digitalWrite (green, HIGH);
-  Serial.println("Opened");
-  delay(5000);
+  userScheduler.addTask(Close);
+  Close.enable();
+}
+
+void closeit(){
   digitalWrite (blue, HIGH);
   digitalWrite (green, LOW);
   digitalWrite (door, HIGH);
@@ -89,9 +95,12 @@ void open(){
 
 void voice(){
   digitalWrite (speak, HIGH);
-  delay(1000);
-  digitalWrite (speak, LOW);
+  userScheduler.addTask(Silence);
+  Silence.enable();
+}
 
+void silence(){
+  digitalWrite (speak, LOW);
 }
 
 // Search our devices
@@ -156,7 +165,6 @@ void setup() {
   myAPIP = IPAddress(mesh.getAPIP());
 
   display.init();
-  display.flipScreenVertically();
   display.clear();
   display.setFont(ArialMT_Plain_10);
     // clear the display
@@ -173,24 +181,34 @@ void setup() {
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     int len = datas.size();
+    Serial.print("Size of datas: ");
     Serial.println(len);
     int k = 0;
     int max = -200;
     int indexofmax = 0;
     while(k<len){
+      Serial.println("Entered while loop");
       if(datas[k]>max){
+        Serial.print("Found Max value: ");
+        Serial.println(datas[k]);
         max = datas[k];
         indexofmax = k;
+        Serial.print("Index is: ");
+        Serial.println(k);
       }
       k += 1;
     }
+    k = 0;
     if(max>INROOM){
+      Serial.print("Worker in the room: ");
       data = "Worker is in the room number: <b>";
       std::list<uint32_t> modes = mesh.getNodeList();
       int sizeofnodes = mesh.getNodeList().size();
       int i = 0;
       std::vector<uint32_t> nodesinV(modes.begin(), modes.end());
       data += String(nodesinV[indexofmax]);
+      Serial.print("Room is: : ");
+      Serial.println(data);
       data += "</b>";
     }
     else{
@@ -212,13 +230,13 @@ void sendMessage() {
   msg += ":";
   msg += signal;
   mesh.sendBroadcast(msg);
-  data = msg;
+  Serial.println(msg);
   signal = "";
 }
 
 
 void scanBLE(){
-  BLEScanResults foundDevices = pBLEScan->start(1);
+  BLEScanResults foundDevices = pBLEScan->start(3);
   int count = foundDevices.getCount(); // Define number of found devices
   bool was = 0;
   for (int i = 0; i < count; i++)
@@ -300,6 +318,7 @@ void delayReceivedCallback(uint32_t from, int32_t delay) {
 void Skud() {
   int Is = scan_env();
   if(Is == 1){
+    Serial.println("Door is opened");
     open();
   }
 }
