@@ -47,10 +47,9 @@ IPAddress myAPIP(0,0,0,0);
 
 bool calc_delay = false;
 SimpleList<uint32_t> nodes;
-std::vector<int> datas;
 
 String signal = "";
-String data = "Hello World";
+String data = "";
 
 
 // Schedule tasks
@@ -60,7 +59,7 @@ void Skud();
 void silence();
 void closeit();
 
-Task taskSendMessage( 8000, TASK_FOREVER, &sendMessage );
+Task taskSendMessage( 5000, TASK_FOREVER, &sendMessage );
 Task Scan_all( 5000, TASK_FOREVER, &scanBLE );
 Task SKUD( 500, TASK_FOREVER, &Skud );
 Task Close( 5000, 1, &closeit );
@@ -147,6 +146,8 @@ void setup() {
 
   BLEDevice::init("Node"); // Initialize BLE device
   pBLEScan = BLEDevice::getScan(); //create new scan
+  pBLEScan->setActiveScan(true);
+  
   mesh.setDebugMsgTypes(ERROR);  // set before init() so that you can see startup messages
 
   mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
@@ -180,41 +181,8 @@ void setup() {
   display.display();
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    int len = datas.size();
-    Serial.print("Size of datas: ");
-    Serial.println(len);
-    int k = 0;
-    int max = -200;
-    int indexofmax = 0;
-    while(k<len){
-      Serial.println("Entered while loop");
-      if(datas[k]>max){
-        Serial.print("Found Max value: ");
-        Serial.println(datas[k]);
-        max = datas[k];
-        indexofmax = k;
-        Serial.print("Index is: ");
-        Serial.println(k);
-      }
-      k += 1;
-    }
-    k = 0;
-    if(max>INROOM){
-      Serial.print("Worker in the room: ");
-      data = "Worker is in the room number: <b>";
-      std::list<uint32_t> modes = mesh.getNodeList();
-      int sizeofnodes = mesh.getNodeList().size();
-      int i = 0;
-      std::vector<uint32_t> nodesinV(modes.begin(), modes.end());
-      data += String(nodesinV[indexofmax]);
-      Serial.print("Room is: : ");
-      Serial.println(data);
-      data += "</b>";
-    }
-    else{
-      data = "Worker`s spot is unknown";
-    }
     request->send(200, "text/html", data);
+    data = "";
   });
   server.begin();
 }
@@ -231,12 +199,15 @@ void sendMessage() {
   msg += signal;
   mesh.sendBroadcast(msg);
   Serial.println(msg);
+  data += "<br>";
+  data += msg;
   signal = "";
 }
 
 
 void scanBLE(){
-  BLEScanResults foundDevices = pBLEScan->start(3);
+  BLEScanResults foundDevices = pBLEScan->start(1);
+
   int count = foundDevices.getCount(); // Define number of found devices
   bool was = 0;
   for (int i = 0; i < count; i++)
@@ -248,12 +219,6 @@ void scanBLE(){
       for(int i = 0; i < 36; i++){
         UUID += String(char(d.getServiceUUID().toString()[i]));
       }
-
-      if(UUID == worker){
-        datas[0] = int(d.getRSSI());
-        was = 1;
-      }
-
       signal += UUID;
       UUID = "";
       signal += ":";
@@ -261,41 +226,11 @@ void scanBLE(){
       signal += ";";
     }
   }
-
-  if(was == 0){
-    datas[0] = -200;
-  }
 }
 
 void receivedCallback(uint32_t from, String & msg) {
-  int k = msg.indexOf(':');
-  String msgN = msg.substring(k);
-  uint32_t id = uint32_t(msg.substring(0, k).toFloat());
-  std::list<uint32_t> modes = mesh.getNodeList();
-  int sizeofnodes = mesh.getNodeList().size();
-  int i = 0;
-  std::vector<uint32_t> nodesinV(modes.begin(), modes.end());
-  while(i<sizeofnodes){
-    uint32_t baba = uint32_t(nodesinV[i]);
-    if(baba == id){
-      while(1){
-        int m = msgN.indexOf(':');
-        String msgW = msgN.substring(0,m);
-        msgN = msgN.substring(m);
-        int a = msgN.indexOf(';');
-        int RSSI = msgN.substring(0,a).toInt();
-        if(msgW == worker){
-          datas[i+1] = RSSI;
-          break;
-        }
-        else{
-          datas[i+1] = -200;
-        }
-      }
-      break;
-    }
-    i += 1;
-  }
+  data += "<br>";
+  data += msg;
 }
 
 void newConnectionCallback(uint32_t nodeId){
