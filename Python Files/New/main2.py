@@ -58,7 +58,7 @@ ser = init()
 # То что крутиться на заднем фоне
 def background_thread():
 	print("Background thread is going")
-    headold = '<td><i class="fa fa-share-alt w3-text-green w3-large"></i></td><td>Mesh network reconfigured.</td><td><i>'
+	headold = '<td><i class="fa fa-share-alt w3-text-green w3-large"></i></td><td>Mesh network reconfigured.</td><td><i>'
 	tailold = '</i></td>'
 	time4 = time.strftime('%d %b %Y %H:%M:%S', time.localtime())
 	oldtext = headold + time4 + tailold
