@@ -26,7 +26,7 @@ def init():
 		ports = ['COM%s' % (i + 1) for i in range(256)]
 	elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
 		# this excludes your current terminal "/dev/tty"
-		ports = glob.glob('/dev/ttyACM*')
+		ports = glob.glob('/dev/ttyUSB*')
 		print(ports)
 	elif sys.platform.startswith('darwin'):
 		ports = glob.glob('/dev/tty.SLAB_USBtoUART*')
