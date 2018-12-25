@@ -20,6 +20,8 @@ thread_lock = Lock()
 interest = "12:3b:6a:1b:56:77"
 places = {'2383295673': "k", '981643341': "h", '2385238209': "o"}
 IDs = ['2383295673', '981643341', '2385238209']
+HEAD = '<table class="w3-table w3-striped w3-white">'
+TAIL = '</table>'
 
 
 def action(text, oldtext):
@@ -114,7 +116,7 @@ def background_thread():
 					responce[places[place]] = "1"
 					text = "Aibek Aibekov [id:448867] entered: " + str(place)
 					oldtext = action(text, oldtext)
-					responce["t"] = oldtext
+					responce["t"] = HEAD + oldtext + TAIL
 					#
 					socketio.emit('my_response',
 								  responce,
@@ -126,7 +128,7 @@ def background_thread():
 					oldplace = ""
 					count = 0
 					#
-					responce["t"] = oldtext
+					responce["t"] = HEAD + oldtext + TAIL
 					socketio.emit('my_response',
 								  responce,
 								  namespace='/test')
@@ -137,7 +139,7 @@ def background_thread():
 				oldplace = ""
 				count = 0
 				#
-				responce["t"] = oldtext
+				responce["t"] = HEAD + oldtext + TAIL
 				socketio.emit('my_response',
 							  responce,
 							  namespace='/test')
