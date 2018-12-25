@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Buyqaw Project</title>
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+            namespace = '/test';
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+            socket.on('my_response', function(msg) {
+                $('#kitchen').html('<br>' + $('<div/>').text(msg.k).html());
+                $('#hall').html('<br>' + $('<div/>').text(msg.h).html());
+                $('#office').html('<br>' + $('<div/>').text(msg.o).html());
+                $('#outside').html('<br>' + $('<div/>').text(msg.s).html());
+                $('#table1').html($('<div/>').text(msg.t).html());
+            });
+        });
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=ZCOOL+QingKe+HuangYou">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+    html,body,h1,h2,h3,h4,h5 {font-family: 'ZCOOL QingKe HuangYou', sans-serif}
+    </style>
+</head>
+<body class="w3-dark-grey">
+
+<!-- !PAGE CONTENT! -->
+<div class="w3-main" style="margin-left:0px;margin-top:0px;">
+
+  <!-- Header -->
+  <header class="w3-container" style="padding-top:22px">
+    <h5><b><i class="fa fa-bluetooth"></i> BUYQAW Project</b></h5>
+  </header>
+
+  <div class="w3-row-padding w3-margin-bottom">
+    <div class="w3-quarter">
+      <div class="w3-container w3-red w3-padding-16">
+        <div class="w3-left"><i class="fa fa-spoon w3-xxxlarge"></i></div>
+        <div class="w3-right">
+          <h3><div id="kitchen"></div></h3>
+        </div>
+        <div class="w3-clear"></div>
+        <h4>Kitchen</h4>
+      </div>
+    </div>
+    <div class="w3-quarter">
+      <div class="w3-container w3-blue w3-padding-16">
+        <div class="w3-left"><i class="fa fa-home w3-xxxlarge"></i></div>
+        <div class="w3-right">
+          <h3><div id="hall"></div></h3>
+        </div>
+        <div class="w3-clear"></div>
+        <h4>Hall</h4>
+      </div>
+    </div>
+    <div class="w3-quarter">
+      <div class="w3-container w3-teal w3-padding-16">
+        <div class="w3-left"><i class="fa fa-envelope-o w3-xxxlarge"></i></div>
+        <div class="w3-right">
+          <h3><div id="office"></div></h3>
+        </div>
+        <div class="w3-clear"></div>
+        <h4>Office</h4>
+      </div>
+    </div>
+    <div class="w3-quarter">
+      <div class="w3-container w3-orange w3-text-white w3-padding-16">
+        <div class="w3-left"><i class="fa fa-search-plus w3-xxxlarge"></i></div>
+        <div class="w3-right">
+          <h3><div id="outside"></div></h3>
+        </div>
+        <div class="w3-clear"></div>
+        <h4>Outside</h4>
+      </div>
+    </div>
+  </div>
+
+  <div class="w3-panel">
+    <div class="w3-row-padding" style="margin:0 -16px">
+      <div class="w3-third">
+        <h5>Heat Map</h5>
+        <img src="https://www.eenews.net/image_assets/2015/12/image_asset_10638.jpg" style="width:100%" alt="Google Regional Map">
+      </div>
+      <div class="w3-twothird">
+        <h5>Feeds</h5>
+        <table class="w3-table w3-striped w3-white">
+          <div id="table1"></div>
+        </table>
+      </div>
+    </div>
+  </div>
+ <!-- End page content -->
+</div>
+
+<script>
+// Get the Sidebar
+var mySidebar = document.getElementById("mySidebar");
+
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+
+// Toggle between showing and hiding the sidebar, and add overlay effect
+function w3_open() {
+  if (mySidebar.style.display === 'block') {
+    mySidebar.style.display = 'none';
+    overlayBg.style.display = "none";
+  } else {
+    mySidebar.style.display = 'block';
+    overlayBg.style.display = "block";
+  }
+}
+
+// Close the sidebar with the close button
+function w3_close() {
+  mySidebar.style.display = "none";
+  overlayBg.style.display = "none";
+}
+</script>
+</body>
+</html>
