@@ -126,6 +126,7 @@ def background_thread():
 					oldplace = ""
 					count = 0
 					#
+					responce["t"] = str(oldtext)
 					socketio.emit('my_response',
 								  responce,
 								  namespace='/test')
@@ -136,6 +137,7 @@ def background_thread():
 				oldplace = ""
 				count = 0
 				#
+				responce["t"] = str(oldtext)
 				socketio.emit('my_response',
 							  responce,
 							  namespace='/test')
