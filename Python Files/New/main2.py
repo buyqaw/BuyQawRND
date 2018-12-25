@@ -8,6 +8,7 @@ import sys
 import glob
 import time
 import serial
+from flask import Markup
 
 
 async_mode = None
@@ -19,6 +20,7 @@ thread = None
 thread_lock = Lock()
 interest = "12:3b:6a:1b:56:77"
 places = {'2383295673': "k", '981643341': "h", '2385238209': "o"}
+places_front = {'2383295673': "Kitchen", '981643341': "Hall", '2385238209': "Office"}
 IDs = ['2383295673', '981643341', '2385238209']
 HEAD = '<table class="w3-table w3-striped w3-white">'
 TAIL = '</table>'
@@ -114,9 +116,9 @@ def background_thread():
 						responce[places[el]] = "0"
 						responce["s"] = "0"
 					responce[places[place]] = "1"
-					text = "Aibek Aibekov [id:448867] entered: " + str(place)
+					text = "Aibek Aibekov [id:448867] entered: " + str(places_front[place])
 					oldtext = action(text, oldtext)
-					responce["t"] = HEAD + oldtext + TAIL
+					responce["t"] = Markup(HEAD + oldtext + TAIL)
 					#
 					socketio.emit('my_response',
 								  responce,
@@ -128,7 +130,7 @@ def background_thread():
 					oldplace = ""
 					count = 0
 					#
-					responce["t"] = HEAD + oldtext + TAIL
+					responce["t"] = Markup(HEAD + oldtext + TAIL)
 					socketio.emit('my_response',
 								  responce,
 								  namespace='/test')
@@ -139,7 +141,7 @@ def background_thread():
 				oldplace = ""
 				count = 0
 				#
-				responce["t"] = HEAD + oldtext + TAIL
+				responce["t"] = Markup(HEAD + oldtext + TAIL)
 				socketio.emit('my_response',
 							  responce,
 							  namespace='/test')
