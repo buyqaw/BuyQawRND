@@ -118,7 +118,7 @@ def background_thread():
 					responce[places[place]] = "1"
 					text = "Aibek Aibekov [id:448867] entered: " + str(places_front[place])
 					oldtext = action(text, oldtext)
-					responce["t"] = Markup(HEAD + oldtext + TAIL)
+					# responce["t"] = Markup(HEAD + oldtext + TAIL)
 					#
 					socketio.emit('my_response',
 								  responce,
@@ -130,7 +130,7 @@ def background_thread():
 					oldplace = ""
 					count = 0
 					#
-					responce["t"] = Markup(HEAD + oldtext + TAIL)
+					# responce["t"] = Markup(HEAD + oldtext + TAIL)
 					socketio.emit('my_response',
 								  responce,
 								  namespace='/test')
@@ -141,7 +141,7 @@ def background_thread():
 				oldplace = ""
 				count = 0
 				#
-				responce["t"] = Markup(HEAD + oldtext + TAIL)
+				# responce["t"] = Markup(HEAD + oldtext + TAIL)
 				socketio.emit('my_response',
 							  responce,
 							  namespace='/test')

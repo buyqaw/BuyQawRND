@@ -13,7 +13,6 @@
                 $('#hall').html('<br>' + $('<div/>').text(msg.h).html());
                 $('#office').html('<br>' + $('<div/>').text(msg.o).html());
                 $('#outside').html('<br>' + $('<div/>').text(msg.s).html());
-                $('#table1').html($('<div/>').html(text(msg.t)));
             });
         });
     </script>
@@ -87,8 +86,10 @@
       </div>
       <div class="w3-twothird">
         <h5>Feeds</h5>
+        <table class="w3-table w3-striped w3-white">
           <div id="table1">
           </div>
+        </table>
       </div>
     </div>
   </div>
