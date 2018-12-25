@@ -53,6 +53,7 @@ def background_thread():
 				RSSI = {}
 			if(ser.in_waiting > 0):
 				lineraw = ser.readline()
+				print(lineraw)
 				line = str(lineraw.decode("utf-8")).replace("\r", "").replace("\n", "")
 				print(line)
 				b = False
