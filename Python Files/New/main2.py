@@ -112,7 +112,7 @@ def background_thread():
 						responce[places[el]] = "0"
 						responce["s"] = "0"
 					responce[places[place]] = "1"
-					text = "Worker entered: " + str(place)
+					text = "Aibek Aibekov [id:448867] entered: " + str(place)
 					oldtext = action(text, oldtext)
 					responce["t"] = str(oldtext)
 					#
