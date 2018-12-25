@@ -39,6 +39,7 @@ ser = init()
 
 # То что крутиться на заднем фоне
 def background_thread():
+	print("Background thread is going")
 	count = 0
 	RSSI = {}
 	oldplace = "h"
