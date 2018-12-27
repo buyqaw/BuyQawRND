@@ -1,0 +1,7 @@
+{
+  "name": "Buyqaw",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}

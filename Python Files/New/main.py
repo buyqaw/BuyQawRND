@@ -16,10 +16,12 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
+
 interest = "12:3b:6a:1b:56:77"
 places = {'2383295673': "k", '981643341': "h", '2385238209': "o"}
 IDs = ['2383295673', '981643341', '2385238209']
-
+ints = {"12:3b:6a:1b:56:77": {"name": "Worker 0", '2383295673': -200, '981643341': -200, '2385238209': -200}}
+ints["a4:c1:7a:57:1c:c1"] = {"name": "Worker 1", '2383295673': -200, '981643341': -200, '2385238209': -200}
 
 def init():
 	if sys.platform.startswith('win'):
@@ -70,54 +72,41 @@ def background_thread():
 					try:
 						a = 0
 						for mac in macs:
-							print("Check it")
-							print(str(mac.split("=")[0]))
-							print(interest)
-							if str(mac.split("=")[0]) == str(interest):
-								RSSI[line.split("!")[0]] = int(mac.split("=")[1])
-								a = 1
-						if a == 0:
-							RSSI[line.split("!")[0]] = -200
+							if str(mac.split("=")[0]) in ints:
+								ints[str(mac.split("=")[0])][line.split("!")[0]] == int(mac.split("=")[1])
+							else:
+								if int(mac.split("=")[1]) > -70:
+									ints[str(mac.split("=")[0])][line.split("!")[0]] == int(mac.split("=")[1])
+									ints[str(mac.split("=")[0])]["name"] == "Worker " + str(len(ints))
+						for key in ints:
+							a = 0
+							for mac in macs:
+								if mac == key:
+									a = 1
+							if a == 0:
+								ints[key][line.split("!")[0]] = -200
 					except:
 						print("Prob here")
-			print(RSSI)
-			try:
-				place = max(RSSI, key=RSSI.get)
-				print(place)
-				if RSSI[place] > -200 and place!=oldplace:
-					oldplace = place
-					for el in IDs:
-						responce[places[el]] = "0"
-						responce["s"] = "0"
-					responce[places[place]] = "1"
-					print(responce)
-					socketio.emit('my_response',
-								  responce,
-								  namespace='/test')
-				if count >= 100000 and place==oldplace or RSSI[place] == -200:
-					for el in IDs:
-						responce[places[el]] = "0"
-					responce["s"] = "1"
-					oldplace = ""
-					count = 0
-					print(responce)
-					socketio.emit('my_response',
-								  responce,
-								  namespace='/test')
-			except:
-				for el in IDs:
-					responce[places[el]] = "0"
-				responce["s"] = "1"
-				oldplace = ""
-				count = 0
-				print(responce)
-				socketio.emit('my_response',
-							  responce,
-							  namespace='/test')
+			responce = {'k': "", 'h': "", 'o': "", "s": ""}
+			for key in ints:
+				rssi = [ints[key]['2383295673'], ints[key]['981643341'], ints[key]['2385238209']]
+				place = max(rssi, key=rssi.get)
+				if rssi[place] > -200:
+					if place == 0:
+						place = '2383295673'
+					elif place == 1:
+						place = '981643341'
+					elif place == 2:
+						place = '2385238209'
+					responce[places[place]] += str(ints[key]['name']) + " <br> "
+			for key in ints:
+				responce["s"] += str(ints[key]["name"]) + " <br> "
+			socketio.emit('my_response',
+						  responce,
+						  namespace='/test')
 		except:
 			ser.flush()
 			print("SHIT!")
-
 
 
 @socketio.on('connect', namespace='/test')
