@@ -77,13 +77,14 @@ def background_thread():
 							rrr = int(mac.split("=")[1])
 							print("Which rssi is " + str(rrr))
 							if str(mac.split("=")[0]) in ints:
-								ints[str(mac.split("=")[0])][line.split("!")[0]] == rrr
+								ints[str(mac.split("=")[0])][line.split("!")[0]] = rrr
 								print("Old user " + str(ints[str(mac.split("=")[0])]["name"]))
+								print("RRR is " + str(rrr))
 								print(ints[str(mac.split("=")[0])][line.split("!")[0]])
 							else:
 								print("Did not see")
 								if int(mac.split("=")[1]) > -60:
-									ints[str(mac.split("=")[0])][line.split("!")[0]] == int(mac.split("=")[1])
+									ints[str(mac.split("=")[0])][line.split("!")[0]] = int(mac.split("=")[1])
 									ints[str(mac.split("=")[0])]["name"] == "Worker " + str(len(ints))
 						for key in ints:
 							a = 0
