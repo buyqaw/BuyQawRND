@@ -104,7 +104,8 @@ def background_thread():
 			socketio.emit('my_response',
 						  responce,
 						  namespace='/test')
-		except:
+		except Exception as e:
+			print(e)
 			ser.flush()
 			print("SHIT!")
 
