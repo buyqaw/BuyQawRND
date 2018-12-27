@@ -89,15 +89,9 @@ def background_thread():
 						print("Prob here")
 			responce = {'k': "", 'h': "", 'o': "", "s": ""}
 			for key in ints:
-				rssi = [ints[key]['2383295673'], ints[key]['981643341'], ints[key]['2385238209']]
+				rssi = {'2383295673': ints[key]['2383295673'], '981643341': ints[key]['981643341'], '2385238209': ints[key]['2385238209']}
 				place = max(rssi, key=rssi.get)
 				if rssi[place] > -200:
-					if place == 0:
-						place = '2383295673'
-					elif place == 1:
-						place = '981643341'
-					elif place == 2:
-						place = '2385238209'
 					responce[places[place]] += str(ints[key]['name']) + " <br> "
 			for key in ints:
 				responce["s"] += str(ints[key]["name"]) + " <br> "
