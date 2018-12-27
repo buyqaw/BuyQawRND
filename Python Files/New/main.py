@@ -66,6 +66,7 @@ def background_thread():
 						break
 				if b == False:
 					print("Error in ESP32")
+
 				else:
 					macs = line.split("!")[1].split(";")[:-1]
 					print("Macs: " + str(macs))
@@ -74,8 +75,10 @@ def background_thread():
 						for mac in macs:
 							if str(mac.split("=")[0]) in ints:
 								ints[str(mac.split("=")[0])][line.split("!")[0]] == int(mac.split("=")[1])
+								print("Old user " + str(ints[str(mac.split("=")[0])]["name"]))
+								print(ints[str(mac.split("=")[0])][line.split("!")[0]])
 							else:
-								if int(mac.split("=")[1]) > -70:
+								if int(mac.split("=")[1]) > -60:
 									ints[str(mac.split("=")[0])][line.split("!")[0]] == int(mac.split("=")[1])
 									ints[str(mac.split("=")[0])]["name"] == "Worker " + str(len(ints))
 						for key in ints:
@@ -90,11 +93,13 @@ def background_thread():
 			responce = {'k': "", 'h': "", 'o': "", "s": ""}
 			for key in ints:
 				rssi = {'2383295673': ints[key]['2383295673'], '981643341': ints[key]['981643341'], '2385238209': ints[key]['2385238209']}
+				print("RSSI for key: " + str(key))
+				print(rssi)
 				place = max(rssi, key=rssi.get)
 				if rssi[place] > -200:
 					responce[places[place]] += str(ints[key]['name']) + " <br> "
 			for key in ints:
-				responce["s"] += str(ints[key]["name"]) + " <br> "
+				responce["s"] += str(ints[key]["name"]) + "; "
 			socketio.emit('my_response',
 						  responce,
 						  namespace='/test')
