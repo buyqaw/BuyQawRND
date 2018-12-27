@@ -86,13 +86,6 @@ def background_thread():
 								if int(mac.split("=")[1]) > -60:
 									ints[str(mac.split("=")[0])][line.split("!")[0]] = int(mac.split("=")[1])
 									ints[str(mac.split("=")[0])]["name"] == "Worker " + str(len(ints))
-						for key in ints:
-							a = 0
-							for mac in macs:
-								if mac == key:
-									a = 1
-							if a == 0:
-								ints[key][line.split("!")[0]] = -200
 					except:
 						print("Prob here")
 			responce = {'k': "", 'h': "", 'o': "", "s": ""}
