@@ -83,7 +83,7 @@ def background_thread():
 								print(ints[str(mac.split("=")[0])][line.split("!")[0]])
 							else:
 								print("Did not see")
-								if int(mac.split("=")[1]) > -60:
+								if int(mac.split("=")[1]) > -80:
 									ints[str(mac.split("=")[0])][line.split("!")[0]] = int(mac.split("=")[1])
 									ints[str(mac.split("=")[0])]["name"] == "Worker " + str(len(ints))
 					except:
