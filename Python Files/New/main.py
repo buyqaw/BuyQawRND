@@ -74,8 +74,10 @@ def background_thread():
 						a = 0
 						for mac in macs:
 							print("Checking for mac " + str(mac))
+							rrr = int(mac.split("=")[1])
+							print("Which rssi is " + str(rrr))
 							if str(mac.split("=")[0]) in ints:
-								ints[str(mac.split("=")[0])][line.split("!")[0]] == int(mac.split("=")[1])
+								ints[str(mac.split("=")[0])][line.split("!")[0]] == rrr
 								print("Old user " + str(ints[str(mac.split("=")[0])]["name"]))
 								print(ints[str(mac.split("=")[0])][line.split("!")[0]])
 							else:
