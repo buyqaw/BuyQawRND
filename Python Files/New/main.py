@@ -95,7 +95,7 @@ def background_thread():
 				print(rssi)
 				place = max(rssi, key=rssi.get)
 				if rssi[place] > -200:
-					responce[places[place]] += str(ints[key]['name']) + " <br> "
+					responce[places[place]] += str(ints[key]['name']) + "; "
 			for key in ints:
 				responce["s"] += str(ints[key]["name"]) + "; "
 			socketio.emit('my_response',
