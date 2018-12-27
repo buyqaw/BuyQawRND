@@ -67,7 +67,7 @@ def background_thread():
 				if b == False:
 					print("Error in ESP32")
 				else:
-					macs = line.split("!")[1].split(";")[-1]
+					macs = line.split("!")[1].split(";")[:-1]
 					print("Macs: " + str(macs))
 					try:
 						a = 0
