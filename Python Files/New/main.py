@@ -61,7 +61,7 @@ def datain(line):
 	socketio.emit('my_response',
 				  responce,
 				  namespace='/test')
-	return 0
+	return "200"
 
 @app.route('/')
 def index():
