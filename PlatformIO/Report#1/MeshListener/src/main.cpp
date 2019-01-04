@@ -20,8 +20,6 @@
 
 // Display and Scan activities
 SSD1306Wire  display(0x3c, 5, 4);
-int RSSIL = 0;
-BLEScan* pBLEScan = NULL;
 
 // Prototypes
 void receivedCallback(uint32_t from, String & msg);
@@ -33,40 +31,8 @@ void delayReceivedCallback(uint32_t from, int32_t delay);
 Scheduler     userScheduler; // to control your personal task
 painlessMesh  mesh;
 
-IPAddress myAPIP(0,0,0,0);
-
 bool calc_delay = false;
 SimpleList<uint32_t> nodes;
-
-String signal = "";
-
-int scanTime = 1;
-
-void scanBLE(){
-  BLEScanResults foundDevices = pBLEScan->start(scanTime);
-  pBLEScan->setActiveScan(true);
-  int count = foundDevices.getCount(); // Define number of found devices
-  for (int i = 0; i < count; i++)
-  {
-    BLEAdvertisedDevice d = foundDevices.getDevice(i); // Define found device
-      char mac[18] = "24:0a:64:43:77:df";
-      for (int b = 0; b < 17; b++){
-        mac[b] = d.getAddress().toString()[b];
-      }
-      String UUID = String(mac);
-      signal += UUID;
-      UUID = "";
-      signal += "=";
-      signal += String(d.getRSSI());
-      signal += ";";
-  }
-  String msg = "";
-  msg += mesh.getNodeId();
-  msg += "!";
-  msg += signal;
-  mesh.sendBroadcast(msg);
-  signal = "";
-}
 
 
 void showit(){
@@ -75,7 +41,7 @@ void showit(){
     // clear the display
   display.setTextAlignment(TEXT_ALIGN_LEFT);
   display.setFont(ArialMT_Plain_10);
-  display.drawString(25, 0, "Buyqaw project");
+  display.drawString(0, 0, "Buyqaw project: Listener");
   display.drawString(0, 15, "Node ID:");
   String Level = String(mesh.getNodeId());
   display.drawStringMaxWidth(50, 15, 128, Level);
@@ -87,49 +53,22 @@ void showit(){
 }
 
 
-// Schedule tasks
-
-Task Scan_all( 3221, TASK_FOREVER, &scanBLE );
-Task show( 7943, TASK_FOREVER, &showit );
-
-
-
 void setup() {
   Serial.begin(115200);
-
-  BLEDevice::init("Node"); // Initialize BLE device
-  pBLEScan = BLEDevice::getScan(); //create new scan
-  pBLEScan->setActiveScan(true);
-
-  mesh.setDebugMsgTypes( ERROR );  // set before init() so that you can see startup messages
-
+  mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE );  // set before init() so that you can see startup messages
   mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
   mesh.onReceive(&receivedCallback);
-  mesh.onNewConnection(&newConnectionCallback);
-  mesh.onChangedConnections(&changedConnectionCallback);
-  mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
-  mesh.onNodeDelayReceived(&delayReceivedCallback);
-
-  userScheduler.addTask( Scan_all );
-  Scan_all.enable();
-  userScheduler.addTask( show );
-  show.enable();
-  // Serial.println("Mesh is activated");
-
-  myAPIP = IPAddress(mesh.getAPIP());
-
   display.init();
   showit();
 }
 
 void loop() {
-  userScheduler.execute(); // it will run mesh scheduler as well
   mesh.update();
 }
 
 
-
 void receivedCallback(uint32_t from, String & msg) {
+  showit();
   Serial.println(msg);
 }
 
