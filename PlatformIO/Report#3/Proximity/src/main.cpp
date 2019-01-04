@@ -47,7 +47,7 @@ int scanTime = 1;
 
 void send_signal(String msg){
   HTTPClient http;
-  http.begin("http://10.3.178.47:7777/extra/" + message); //Specify destination for HTTP request
+  http.begin("http://10.3.178.47:7777/extra/" + msg); //Specify destination for HTTP request
   http.addHeader("Content-Type", "text/plain"); //Specify content-type header
   int httpResponseCode = http.GET(); //Send the actual POST request
   http.end(); //Free resources
@@ -115,11 +115,6 @@ void setup() {
   mesh.setDebugMsgTypes( ERROR );  // set before init() so that you can see startup messages
 
   mesh.init(MESH_SSID, MESH_PASSWORD, &userScheduler, MESH_PORT);
-  mesh.onReceive(&receivedCallback);
-  mesh.onNewConnection(&newConnectionCallback);
-  mesh.onChangedConnections(&changedConnectionCallback);
-  mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
-  mesh.onNodeDelayReceived(&delayReceivedCallback);
 
   name = String(mesh.getNodeId());
   mesh.stop();

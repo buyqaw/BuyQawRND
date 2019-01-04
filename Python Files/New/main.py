@@ -26,10 +26,10 @@ ints["a4:c1:7a:57:1c:c1"] = {"name": "Worker 1", 'place': None}
 
 @socketio.on('connect', namespace='/test')
 def test_connect():
-	global thread
-	with thread_lock:
-		if thread is None:
-			thread = socketio.start_background_task(target=background_thread)
+	# global thread
+	# with thread_lock:
+	# 	if thread is None:
+	# 		thread = socketio.start_background_task(target=background_thread)
 
 
 @app.route('/extra/<line>')
