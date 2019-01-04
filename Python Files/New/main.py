@@ -26,6 +26,7 @@ ints["a4:c1:7a:57:1c:c1"] = {"name": "Worker 1", 'place': None}
 
 @socketio.on('connect', namespace='/test')
 def test_connect():
+	print("Connection")
 	# global thread
 	# with thread_lock:
 	# 	if thread is None:
