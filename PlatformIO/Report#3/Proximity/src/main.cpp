@@ -102,12 +102,6 @@ Task Scan_all( 1221, TASK_FOREVER, &scanBLE );
 void setup() {
   Serial.begin(115200);
 
-  WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-      }
-
   BLEDevice::init("Node"); // Initialize BLE device
   pBLEScan = BLEDevice::getScan(); //create new scan
   pBLEScan->setActiveScan(true);
@@ -118,6 +112,13 @@ void setup() {
 
   name = String(mesh.getNodeId());
   mesh.stop();
+
+  WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+      }
+      
   userScheduler.addTask( Scan_all );
   Scan_all.enable();
   // Serial.println("Mesh is activated");
