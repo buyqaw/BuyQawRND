@@ -20,8 +20,8 @@ thread_lock = Lock()
 interest = "12:3b:6a:1b:56:77"
 places = {'2383295673': "k", '981643341': "h", '2385238209': "o"}
 IDs = ['2383295673', '981643341', '2385238209']
-ints = {"12:3b:6a:1b:56:77": {"name": "Worker 0", '2383295673': -200, '981643341': -200, '2385238209': -200}}
-ints["a4:c1:7a:57:1c:c1"] = {"name": "Worker 1", '2383295673': -200, '981643341': -200, '2385238209': -200}
+ints = {"12:3b:6a:1b:56:77": {"name": "Worker 0", 'place': None}}
+ints["a4:c1:7a:57:1c:c1"] = {"name": "Worker 1", 'place': None}
 
 def init():
 	if sys.platform.startswith('win'):
@@ -35,6 +35,7 @@ def init():
 	else:
 		raise EnvironmentError('Unsupported platform')
 	ser = serial.Serial(ports[0], 115200)
+	print("Connected to " + str(ports[0]))
 	return ser
 
 ser = init()
@@ -69,35 +70,28 @@ def background_thread():
 
 				else:
 					macs = line.split("!")[1].split(";")[:-1]
+					place = places[line.split("!")[0]]
 					print("Macs: " + str(macs))
 					try:
-						a = 0
 						for mac in macs:
-							print("Checking for mac " + str(mac))
+							mad = str(mac.split("=")[0])
 							rrr = int(mac.split("=")[1])
-							print("Which rssi is " + str(rrr))
-							if str(mac.split("=")[0]) in ints:
-								ints[str(mac.split("=")[0])][line.split("!")[0]] = rrr
-								print("Old user " + str(ints[str(mac.split("=")[0])]["name"]))
-								print("RRR is " + str(rrr))
-								print(ints[str(mac.split("=")[0])][line.split("!")[0]])
-							else:
-								print("Did not see")
-								if int(mac.split("=")[1]) > -80:
-									ints[str(mac.split("=")[0])][line.split("!")[0]] = int(mac.split("=")[1])
-									ints[str(mac.split("=")[0])]["name"] == "Worker " + str(len(ints))
-					except:
-						print("Prob here")
+							print("Checking for mac " + str(mad) + " with " + str(rrr))
+							if rrr > -85:
+								if mad in ints:
+									ints[mad]['place'] = place
+								else:
+									ints[mad] = {"name": ("Worker " + str(len(ints))), 'place': place}
+								print("Worker is " + str(ints[mad]))
+					except Exception as e:
+						print(e)
+						print("Problem here")
 			responce = {'k': "", 'h': "", 'o': "", "s": ""}
 			for key in ints:
-				rssi = {'2383295673': ints[key]['2383295673'], '981643341': ints[key]['981643341'], '2385238209': ints[key]['2385238209']}
-				print("RSSI for key: " + str(key))
-				print(rssi)
-				place = max(rssi, key=rssi.get)
-				if rssi[place] > -200:
-					responce[places[place]] += str(ints[key]['name']) + "; "
-			for key in ints:
 				responce["s"] += str(ints[key]["name"]) + "; "
+				for key_r in responce:
+					if key_r == ints[key]['place']:
+						responce[key_r] += str(ints[key]['name']) + ";"
 			socketio.emit('my_response',
 						  responce,
 						  namespace='/test')
@@ -122,11 +116,4 @@ def index():
 
 
 if __name__ == '__main__':
-
-	# while True:
-	# 	try:
-	# 		ser = init()
-	# 		break
-	# 	except:
-	# 		print("No mesh")
-	socketio.run(app, debug=True, host='0.0.0.0', port=7777)
+	socketio.run(app, debug=False, host='0.0.0.0', port=7777)

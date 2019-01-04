@@ -40,17 +40,34 @@ SimpleList<uint32_t> nodes;
 
 String signal = "";
 
-// Schedule tasks
-void scanBLE();
-void sendMessage();
-void silence();
-void closeit();
-void showit();
-
-Task Scan_all( 10000, TASK_FOREVER, &scanBLE );
-Task show( 4000, TASK_FOREVER, &showit );
-
 int scanTime = 1;
+
+void scanBLE(){
+  BLEScanResults foundDevices = pBLEScan->start(scanTime);
+  pBLEScan->setActiveScan(true);
+  int count = foundDevices.getCount(); // Define number of found devices
+  for (int i = 0; i < count; i++)
+  {
+    BLEAdvertisedDevice d = foundDevices.getDevice(i); // Define found device
+      char mac[18] = "24:0a:64:43:77:df";
+      for (int b = 0; b < 17; b++){
+        mac[b] = d.getAddress().toString()[b];
+      }
+      String UUID = String(mac);
+      signal += UUID;
+      UUID = "";
+      signal += "=";
+      signal += String(d.getRSSI());
+      signal += ";";
+  }
+  String msg = "";
+  msg += mesh.getNodeId();
+  msg += "!";
+  msg += signal;
+  mesh.sendBroadcast(msg);
+  Serial.println(msg);
+  signal = "";
+}
 
 
 void showit(){
@@ -63,15 +80,19 @@ void showit(){
   display.drawString(0, 15, "Node ID:");
   String Level = String(mesh.getNodeId());
   display.drawStringMaxWidth(50, 15, 128, Level);
-  String ip = myAPIP.toString();
-  display.drawString(0, 25, "Server IP:");
-  display.drawStringMaxWidth(50, 25, 128, ip);
   String num = String(int(mesh.getNodeList().size()) + 1);
-  display.drawString(0, 35, "Mesh size:");
-  display.drawStringMaxWidth(50, 35, 128, num);
+  display.drawString(0, 25, "Mesh size:");
+  display.drawStringMaxWidth(50, 25, 128, num);
   display.drawString(50, 50, "Buyqaw LLP");
   display.display();
 }
+
+
+// Schedule tasks
+
+Task Scan_all( 3221, TASK_FOREVER, &scanBLE );
+Task show( 7943, TASK_FOREVER, &showit );
+
 
 
 void setup() {
@@ -108,32 +129,6 @@ void loop() {
 }
 
 
-void scanBLE(){
-  BLEScanResults foundDevices = pBLEScan->start(scanTime);
-
-  int count = foundDevices.getCount(); // Define number of found devices
-  for (int i = 0; i < count; i++)
-  {
-    BLEAdvertisedDevice d = foundDevices.getDevice(i); // Define found device
-      char mac[18] = "24:0a:64:43:77:df";
-      for (int b = 0; b < 17; b++){
-        mac[b] = d.getAddress().toString()[b];
-      }
-      String UUID = String(mac);
-      signal += UUID;
-      UUID = "";
-      signal += "=";
-      signal += String(d.getRSSI());
-      signal += ";";
-  }
-  String msg = "";
-  msg += mesh.getNodeId();
-  msg += "!";
-  msg += signal;
-  mesh.sendBroadcast(msg);
-  Serial.println(msg);
-  signal = "";
-}
 
 void receivedCallback(uint32_t from, String & msg) {
   Serial.println(msg);
